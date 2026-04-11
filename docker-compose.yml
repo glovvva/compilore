@@ -1,0 +1,10 @@
+# Local smoke test — matches Coolify-style Docker deployment (brief §2: Hetzner + Coolify).
+services:
+  compilore:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./wiki:/app/wiki

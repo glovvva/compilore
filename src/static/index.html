@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Compilore</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f0f0f;
+      --fg: #d4d4c8;
+      --muted: #73736b;
+      --border: #2a2a2a;
+      --input-bg: #161616;
+      --accent: #9cdcfe;
+      --err: #f44747;
+      --ok: #6a9955;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: ui-monospace, "Cascadia Code", "SF Mono", Menlo, Consolas, monospace;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    body { padding: 1.25rem 1.25rem 4.5rem; max-width: 52rem; margin: 0 auto; }
+    h1 { font-size: 1.1rem; font-weight: 600; letter-spacing: 0.04em; margin: 0 0 0.25rem; }
+    .tagline { color: var(--muted); font-size: 0.8rem; margin-bottom: 1.75rem; }
+    section {
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1rem 1rem 1.1rem;
+      margin-bottom: 1.25rem;
+      background: #121212;
+    }
+    section h2 {
+      margin: 0 0 0.75rem;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    label { display: block; font-size: 0.75rem; color: var(--muted); margin-bottom: 0.35rem; }
+    input[type="url"],
+    input[type="file"],
+    textarea {
+      width: 100%;
+      background: var(--input-bg);
+      color: var(--fg);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 0.5rem 0.6rem;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    textarea { min-height: 7rem; resize: vertical; }
+    input[type="file"] { padding: 0.4rem; cursor: pointer; }
+    .row { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-top: 0.65rem; }
+    button {
+      font-family: inherit;
+      font-size: 0.85rem;
+      padding: 0.45rem 0.9rem;
+      background: var(--border);
+      color: var(--fg);
+      border: 1px solid #3a3a3a;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    button:hover:not(:disabled) { background: #333; border-color: #555; }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
+    .spinner {
+      display: none;
+      width: 14px;
+      height: 14px;
+      border: 2px solid #333;
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.65s linear infinite;
+      vertical-align: middle;
+    }
+    .spinner.on { display: inline-block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .out {
+      margin-top: 0.85rem;
+      padding-top: 0.85rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.85rem;
+    }
+    .out:empty { display: none; }
+    .err-inline { color: var(--err); margin-top: 0.5rem; font-size: 0.8rem; white-space: pre-wrap; }
+    .pages-list { list-style: none; padding: 0; margin: 0; }
+    .pages-list li {
+      padding: 0.35rem 0;
+      border-bottom: 1px solid #1f1f1f;
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 0.5rem;
+      align-items: baseline;
+    }
+    .pages-list li:last-child { border-bottom: none; }
+    .slug { color: var(--accent); font-size: 0.8rem; }
+    .ptype { color: var(--muted); font-size: 0.75rem; }
+    .md-body {
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 0.75rem 1rem;
+      margin-top: 0.5rem;
+      overflow-x: auto;
+    }
+    .md-body :first-child { margin-top: 0; }
+    .md-body :last-child { margin-bottom: 0; }
+    .md-body a { color: var(--accent); }
+    .md-body code { background: #0a0a0a; padding: 0.1em 0.35em; border-radius: 2px; font-size: 0.88em; }
+    .md-body pre code { background: transparent; padding: 0; }
+    .meta-line { margin-top: 0.6rem; font-size: 0.8rem; color: var(--muted); }
+    .save-badge { margin-top: 0.5rem; font-size: 0.85rem; }
+    .citations { margin-top: 0.5rem; font-size: 0.8rem; color: var(--muted); }
+    #status-bar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 0.5rem 1rem;
+      background: #0a0a0a;
+      border-top: 1px solid var(--border);
+      font-size: 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    #status-bar .msg { color: var(--muted); flex: 1; min-width: 12rem; }
+    #status-bar .msg.err { color: var(--err); }
+    #status-bar .msg.ok { color: var(--ok); }
+    .empty-hint { color: var(--muted); font-style: italic; }
+    .gk-reason { margin-top: 0.75rem; padding: 0.5rem; background: #0a0a0a; border-left: 2px solid var(--border); font-size: 0.78rem; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <h1>Compilore</h1>
+  <p class="tagline">Agentic knowledge compiler — ingest, compile, query (Phase 1 playground)</p>
+
+  <section id="sec-url">
+    <h2>Ingest URL</h2>
+    <label for="url-input">Article URL</label>
+    <input type="url" id="url-input" placeholder="https://…" autocomplete="url" />
+    <div class="row">
+      <button type="button" id="btn-url">Ingest</button>
+      <span class="spinner" id="spin-url" aria-hidden="true"></span>
+    </div>
+    <div class="err-inline" id="err-url" hidden></div>
+    <div class="out" id="out-url"></div>
+  </section>
+
+  <section id="sec-file">
+    <h2>Ingest File</h2>
+    <label for="file-input">Markdown, text, or PDF</label>
+    <input type="file" id="file-input" accept=".md,.txt,.pdf,text/markdown,text/plain,application/pdf" />
+    <div class="row">
+      <button type="button" id="btn-file">Upload &amp; ingest</button>
+      <span class="spinner" id="spin-file" aria-hidden="true"></span>
+    </div>
+    <div class="err-inline" id="err-file" hidden></div>
+    <div class="out" id="out-file"></div>
+  </section>
+
+  <section id="sec-query">
+    <h2>Query</h2>
+    <label for="q-input">Question</label>
+    <textarea id="q-input" placeholder="Ask against your compiled Wiki…"></textarea>
+    <div class="row">
+      <button type="button" id="btn-query">Ask</button>
+      <span class="spinner" id="spin-query" aria-hidden="true"></span>
+    </div>
+    <div class="err-inline" id="err-query" hidden></div>
+    <div class="out" id="out-query"></div>
+  </section>
+
+  <footer id="status-bar">
+    <span class="msg" id="status-msg">Ready.</span>
+    <span class="msg" id="status-time"></span>
+  </footer>
+
+  <script>
+(function () {
+  function formatDetail(detail) {
+    if (detail == null) return "Unknown error";
+    if (typeof detail === "string") return detail;
+    if (Array.isArray(detail)) {
+      return detail.map(function (e) {
+        if (e && typeof e === "object" && e.msg) return e.msg;
+        return JSON.stringify(e);
+      }).join("; ");
+    }
+    if (typeof detail === "object") return JSON.stringify(detail);
+    return String(detail);
+  }
+
+  function setStatus(text, kind) {
+    var el = document.getElementById("status-msg");
+    var t = document.getElementById("status-time");
+    el.textContent = text;
+    el.className = "msg" + (kind === "err" ? " err" : kind === "ok" ? " ok" : "");
+    t.textContent = new Date().toLocaleTimeString();
+  }
+
+  function showErr(id, msg) {
+    var e = document.getElementById(id);
+    if (!msg) { e.hidden = true; e.textContent = ""; return; }
+    e.hidden = false;
+    e.textContent = msg;
+  }
+
+  function setLoading(spinId, btnIds, loading) {
+    document.getElementById(spinId).classList.toggle("on", loading);
+    (btnIds || []).forEach(function (id) {
+      document.getElementById(id).disabled = loading;
+    });
+  }
+
+  function renderPages(container, pages) {
+    container.innerHTML = "";
+    if (!pages || !pages.length) {
+      container.innerHTML = '<p class="empty-hint">No pages returned (empty compile result).</p>';
+      return;
+    }
+    var ul = document.createElement("ul");
+    ul.className = "pages-list";
+    pages.forEach(function (p) {
+      var li = document.createElement("li");
+      var title = document.createElement("span");
+      title.textContent = p.title || "(no title)";
+      var slug = document.createElement("span");
+      slug.className = "slug";
+      slug.textContent = p.slug || "";
+      var pt = document.createElement("span");
+      pt.className = "ptype";
+      pt.textContent = p.page_type || "";
+      li.appendChild(title);
+      li.appendChild(slug);
+      li.appendChild(pt);
+      ul.appendChild(li);
+    });
+    container.appendChild(ul);
+  }
+
+  async function safeJson(res) {
+    var t = await res.text();
+    if (!t) return null;
+    try { return JSON.parse(t); } catch (_) { return null; }
+  }
+
+  document.getElementById("btn-url").addEventListener("click", async function () {
+    var url = document.getElementById("url-input").value.trim();
+    showErr("err-url", "");
+    document.getElementById("out-url").innerHTML = "";
+    if (!url) {
+      showErr("err-url", "Enter a URL.");
+      setStatus("URL ingest: validation error", "err");
+      return;
+    }
+    setLoading("spin-url", ["btn-url"], true);
+    setStatus("Ingesting URL…");
+    try {
+      var res = await fetch("/ingest/url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: url }),
+      });
+      var data = await safeJson(res);
+      if (!res.ok) {
+        var d = data && data.detail != null ? formatDetail(data.detail) : res.statusText;
+        showErr("err-url", d);
+        setStatus("URL ingest failed: " + d, "err");
+        return;
+      }
+      renderPages(document.getElementById("out-url"), data);
+      setStatus("URL ingest OK — " + (data && data.length) + " page(s)", "ok");
+    } catch (e) {
+      var net = e && e.message ? e.message : String(e);
+      showErr("err-url", "Network error: " + net);
+      setStatus("URL ingest: network error", "err");
+    } finally {
+      setLoading("spin-url", ["btn-url"], false);
+    }
+  });
+
+  document.getElementById("btn-file").addEventListener("click", async function () {
+    var input = document.getElementById("file-input");
+    showErr("err-file", "");
+    document.getElementById("out-file").innerHTML = "";
+    if (!input.files || !input.files[0]) {
+      showErr("err-file", "Choose a file first.");
+      setStatus("File ingest: no file", "err");
+      return;
+    }
+    var fd = new FormData();
+    fd.append("file", input.files[0]);
+    setLoading("spin-file", ["btn-file"], true);
+    setStatus("Uploading file…");
+    try {
+      var res = await fetch("/ingest", { method: "POST", body: fd });
+      var data = await safeJson(res);
+      if (!res.ok) {
+        var d = data && data.detail != null ? formatDetail(data.detail) : res.statusText;
+        showErr("err-file", d);
+        setStatus("File ingest failed: " + d, "err");
+        return;
+      }
+      renderPages(document.getElementById("out-file"), data);
+      setStatus("File ingest OK — " + (data && data.length) + " page(s)", "ok");
+    } catch (e) {
+      var net = e && e.message ? e.message : String(e);
+      showErr("err-file", "Network error: " + net);
+      setStatus("File ingest: network error", "err");
+    } finally {
+      setLoading("spin-file", ["btn-file"], false);
+    }
+  });
+
+  document.getElementById("btn-query").addEventListener("click", async function () {
+    var q = document.getElementById("q-input").value.trim();
+    showErr("err-query", "");
+    document.getElementById("out-query").innerHTML = "";
+    if (!q) {
+      showErr("err-query", "Enter a question.");
+      setStatus("Query: empty question", "err");
+      return;
+    }
+    setLoading("spin-query", ["btn-query"], true);
+    setStatus("Querying Wiki…");
+    try {
+      var res = await fetch("/query", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: q }),
+      });
+      var data = await safeJson(res);
+      if (!res.ok) {
+        var d = data && data.detail != null ? formatDetail(data.detail) : res.statusText;
+        showErr("err-query", d);
+        setStatus("Query failed: " + d, "err");
+        return;
+      }
+      var out = document.getElementById("out-query");
+      var md = (data.answer_markdown || "").trim();
+      if (!md) {
+        out.innerHTML = '<p class="empty-hint">No relevant pages found — empty answer from the model.</p>';
+        setStatus("Query OK — no answer body", "ok");
+        return;
+      }
+      var html = typeof marked !== "undefined" && marked.parse
+        ? marked.parse(md, { breaks: true })
+        : "<pre>" + md.replace(/</g, "&lt;") + "</pre>";
+      var wrap = document.createElement("div");
+      wrap.innerHTML =
+        '<div class="md-body">' + html + "</div>" +
+        '<div class="save-badge">' +
+          (data.saved_to_wiki
+            ? "💾 Saved to Wiki"
+            : "🔍 Not saved") +
+        "</div>";
+      if (data.citations && data.citations.length) {
+        wrap.innerHTML += '<div class="citations">Citations: ' +
+          data.citations.map(function (c) { return "<code>" + String(c).replace(/</g, "&lt;") + "</code>"; }).join(" ") +
+          "</div>";
+      } else {
+        wrap.innerHTML += '<div class="citations empty-hint">No citations returned.</div>';
+      }
+      if (typeof data.cost_usd === "number") {
+        wrap.innerHTML += '<div class="meta-line">Estimated Claude cost (this query): $' + data.cost_usd.toFixed(4) + "</div>";
+      }
+      if (data.gatekeeper_reasoning) {
+        wrap.innerHTML += '<div class="gk-reason"><strong>Gatekeeper</strong> — ' +
+          String(data.gatekeeper_reasoning).replace(/</g, "&lt;") + "</div>";
+      }
+      out.appendChild(wrap);
+      setStatus("Query OK", "ok");
+    } catch (e) {
+      var net = e && e.message ? e.message : String(e);
+      showErr("err-query", "Network error: " + net);
+      setStatus("Query: network error", "err");
+    } finally {
+      setLoading("spin-query", ["btn-query"], false);
+    }
+  });
+})();
+  </script>
+</body>
+</html>

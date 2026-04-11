@@ -1,0 +1,19 @@
+---
+description: Compilore — Agentic Knowledge Compiler architecture and coding standards
+globs:
+  - "**/*.py"
+  - "**/prompts/*.md"
+alwaysApply: true
+---
+
+# Compilore project rules
+
+- **Python:** Use Python 3.12+ with type hints on all public functions, methods, and module-level names.
+- **API:** Use FastAPI for every HTTP endpoint; validate request/response bodies with **Pydantic v2**.
+- **Structure:** Do **not** grow monolithic scripts. Prefer the **Adapter Pattern** (one adapter per source type or concern); new capability → new isolated module or adapter.
+- **Routes:** Keep route handlers thin. **Business logic lives in `src/modules/`** (and `src/lib/` for shared clients), not in FastAPI route functions.
+- **Agents:** Use **LangGraph** for all agent orchestration (ingest/compile, query, lint graphs).
+- **Prompts:** Store all LLM system prompts as **`.md` files under `src/config/prompts/`**; load them from code—do not inline large prompt strings in Python except for trivial glue.
+- **Wiki:** The Wiki is Git-versioned Markdown. **Every write to the Wiki must result in a Git commit** (atomic, traceable changes).
+
+When in doubt, align with `COMPILORE_PROJECT_BRIEF_v2.md`.

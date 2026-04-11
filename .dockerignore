@@ -1,0 +1,27 @@
+# Root Git metadata only (nested wiki/.git is kept — pattern is context-root anchored)
+/.git
+
+.venv
+venv
+__pycache__
+**/__pycache__
+*.py[cod]
+*$py.class
+*.pyc
+.pytest_cache
+.mypy_cache
+.ruff_cache
+
+.env
+.env.*
+!.env.example
+
+.cursor
+*.swp
+*.swo
+.DS_Store
+
+# Local / IDE noise (image stays small; no secrets)
+*.log
+htmlcov
+.coverage
