@@ -1,4 +1,11 @@
-"""Gatekeeper for the **Query** loop (critical safeguard — brief §5.1)."""
+"""Gatekeeper for the **Query** loop (critical safeguard — brief §5.1).
+
+TODO (PreResponseChecklist pattern, GapRoll-style): after the model returns an evaluation,
+add a self-check step that verifies the written reasoning is internally consistent with
+the three criteria **Novelty × Necessity × Grounding** before persisting or returning the
+decision (e.g. short second pass or structured checklist). Not implemented yet — current
+flow returns the first structured JSON decision only.
+"""
 
 from __future__ import annotations
 
@@ -11,6 +18,8 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from src.lib.anthropic_cost import anthropic_usd_from_usage
 from src.lib.json_llm import parse_json_object
+from src.lib.supabase import create_supabase_client, insert_wiki_log_row
+from src.modules.query.hybrid_search import gatekeeper_answer_precheck
 from src.modules.query.models import ChunkResult, SynthesisResult
 
 GATEKEEPER_MODEL = "claude-haiku-4-5-20251001"
@@ -36,6 +45,7 @@ def run_gatekeeper_evaluation(
     answer: SynthesisResult,
     chunks: list[ChunkResult],
     *,
+    tenant_id: str | None = None,
     api_key: str | None = None,
 ) -> tuple[GatekeeperDecision, int, int, float]:
     """Call Haiku; return decision and (input_tokens, output_tokens, cost_usd)."""
@@ -55,10 +65,41 @@ def run_gatekeeper_evaluation(
         "retrieved_chunks": chunk_summary,
     }
 
+    precheck_note = ""
+    tid = (tenant_id or "").strip()
+    if tid:
+        try:
+            hit = gatekeeper_answer_precheck(tid, answer.answer_markdown)
+            if hit:
+                slug, ptype, sim = hit
+                precheck_note = (
+                    f"\n\nNOTE: This knowledge already exists at [[{slug}]] (similarity: {sim:.2f}). "
+                    "Evaluate whether saving this adds genuine value beyond the existing page.\n"
+                )
+                try:
+                    client = create_supabase_client()
+                    insert_wiki_log_row(
+                        client,
+                        tenant_id=tid,
+                        operation="gatekeeper_precheck",
+                        details={
+                            "existing_page": slug,
+                            "similarity": sim,
+                            "page_type": ptype,
+                            "decision": "injected_context",
+                        },
+                        module="gatekeeper",
+                    )
+                except Exception:
+                    pass
+        except Exception:
+            pass
+
     system = _load_gatekeeper_prompt()
     user = (
         "Evaluate whether to save this answer to the Wiki as an output page.\n\n"
         + json.dumps({"evaluation_payload": payload}, ensure_ascii=False)
+        + precheck_note
     )
 
     ac = anthropic.Anthropic(api_key=key)
@@ -102,6 +143,7 @@ def evaluate_answer(
     answer: SynthesisResult,
     chunks: list[ChunkResult],
     *,
+    tenant_id: str | None = None,
     api_key: str | None = None,
 ) -> GatekeeperDecision:
     """Public API: gate decision only (see :func:`run_gatekeeper_evaluation` for usage)."""
@@ -109,6 +151,7 @@ def evaluate_answer(
         question,
         answer,
         chunks,
+        tenant_id=tenant_id,
         api_key=api_key,
     )
     return decision

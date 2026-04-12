@@ -1,7 +1,7 @@
 # 02 — STRATEGY
 ## Compilore: Market, GTM, Pricing, Risks
 
-**Last updated:** 2026-04-11
+**Last updated:** 2026-04-12
 
 ---
 
@@ -23,33 +23,36 @@
 
 ## Target Market (Phase 2)
 
-**Beachhead:** Polish architectural firms (biura projektowe)
+### GIS Spatial Engine — Segmenty (priorytet)
 
-| Metric | Value |
-|---|---|
-| Licensed architects in Poland | ~14,300 |
-| Licensed architects in Europe | ~580,000 |
-| Small independent practices | 46% |
-| AI tools for architects that are 3D rendering | ~95% |
-| AI tools for text-based legal analysis | effectively 0 |
+**Segment 1 — Deweloperzy MŚP (PRIMARY, pierwsze 12 msc):**
 
-**Why this market:**
-- Blue Ocean: zero competition in text-based legal document analysis for architects
-- Regulatory moat: Polish MPZP (local spatial planning documents) are complex, municipality-specific, constantly changing
-- Pain is acute and recurring: architects consult MPZP on every single project
-- Willingness to pay: legal clarity directly affects permit approval → revenue
+- **Definicja:** firmy realizujące 5–50 projektów/rok, budżety 10–200M PLN
+- **Liczba:** kilkaset do 2,000+ aktywnych podmiotów w Polsce
+- **Decision maker:** właściciel lub Land Acquisition Manager
+- **Cykl sprzedaży:** 1–3 tygodnie po demo
+- **ARPU:** 2,000–4,000 PLN/msc
+- **Pain:** ryzyko zakupu działki wyrzuconej poza OUZ, opóźnienia 7–21 dni przy manualnej analizie, koszt 30,000–200,000 PLN due diligence per zakup gruntu
+- **Pitch:** „Tarcza chroniąca 10M PLN przed błędnym zakupem”
 
-**Behavioral insight from research:** Architects perform "shadow testing" — they run
-a finished, known project through a tool first to verify accuracy. If the tool is
-wrong once, it is discarded permanently. Implication: Compilore must show its work.
-Every answer requires a verifiable citation trail to the source page/paragraph.
-This is a hard requirement, not a UX nicety.
+**Segment 2 — Fundusze PE / Family Offices (SECONDARY, 6–18 msc):**
 
-**Trigger event — Plan Ogólny reform:**
-Poland's planning reform (Plan Ogólny replacing Studium) is a disruptive transition
-creating confusion across all municipalities. Architects who just received a permit
-rejection due to misunderstanding the new system are "active wounded" — highest
-conversion probability. Content and outreach should target this context.
+- **Definicja:** portfele 50–500+ działek, zarządzane przez fundusze
+- **Liczba:** 2,112 fundacji rodzinnych + 34 fundusze VC/PE (Q1 2025)
+- **Decision maker:** zarząd/rada nadzorcza (długi procurement)
+- **Cykl sprzedaży:** 3–6 miesięcy
+- **ARPU:** 6,000–10,000 PLN/msc (Conflict Alert jako główny feature)
+- **Pain:** portfel land-bankowy narażony na systemowe ryzyko POG, niemożność monitorowania 2,479 gmin manualnie
+- **Pitch:** „Radar portfela — alarmuje gdy POG deprecjonuje Twój bank ziemi”
+
+**Segment 3 — Rzeczoznawcy majątkowi (TERTIARY, model transakcyjny):**
+
+- **Definicja:** 7,591 certyfikowanych rzeczoznawców
+- **Model:** Pay-Per-Report (nie subskrypcja), 1 credit = 1 operat
+- **ARPU:** 500–1,500 PLN/msc lub per-query
+- **Pain:** weryfikacja planistyczna w każdym operacie szacunkowym, chaos w „interregnum” POG vs stare MPZP
+
+**Compilore (architekci / PKB tekstowy)** pozostaje produktem równoległym (vitamin / edukacja rynku); GIS Engine jest **painkillerem** priorytetowym według DR-7 i D-45.
 
 ---
 
@@ -139,6 +142,11 @@ Tax advisory is highest-priority Phase 3 target — distribution channel already
 | AI hallucination liability (Phase 2) | Architect builds on wrong parameter | Art. 473 KC liability cap + mandatory verification clause + citations in every answer |
 | Platform risk (Anthropic/OpenAI builds this) | Commoditization | Vertical depth (Polish MPZP), proprietary compiled data, workflow lock-in, regulatory moat |
 | Docling RAM crash (Phase 2) | OOM on Hetzner | OMP_NUM_THREADS=1, page-by-page, gc.collect(), OCR offload to VLM API |
+| OnGeo pivot | OnGeo lub AnalizaChlonnosci.AI dodaje OUZ Predictor | Buduj brand + case studies + Harvey-style partnership zanim to zrobią |
+| Licencja zawodowa | Wysoki — nieadresowany: system interpretowany jako „opinia urbanistyczna” wymagająca uprawnień architekta/urbanisty | UI disclaimer mandatory + konsultacja prawna przed launch |
+| EGiB data staleness | Średni — zarządzalny: budynki w EGiB opóźnione 6–18 msc → błędny wynik OUZ | Timestamp widoczny dla użytkownika + ostrzeżenie >180 dni |
+| GML data quality | Wysoki — pewny: 20–40%+ wadliwych plików GML w pierwszej fali | Pipeline defensywny: ST_MakeValid() + logowanie + fallback |
+| API availability | Wysoki — prawdopodobny: Rejestr Urbanistyczny nie gotowy przed sierpniem 2026 | Trzy źródła danych z failover (D-47) |
 
 ---
 

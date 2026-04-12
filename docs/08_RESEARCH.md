@@ -4,7 +4,7 @@
 **This is a living document.** Each Deep Research session adds a new dated section.
 Findings here directly inform decisions logged in 04_DECISIONS.md.
 
-**Last updated:** 2026-04-11
+**Last updated:** 2026-04-12
 
 ---
 
@@ -367,7 +367,7 @@ Marp: pure Markdown with `---` slide separators → compiles to PPTX/PDF.
 Export fidelity is critical: beautiful HTML that breaks on export creates MORE work.
 
 Decision: `/deck` output format = Marp → PPTX. LLM generates standard Markdown.
-Marp handles compilation. Architects get editable PowerPoint. → D-33.
+Marp handles compilation. Architects get editable PowerPoint. → D-39.
 
 ### Gated Execution for Lint Loop
 
@@ -378,7 +378,7 @@ Applied to contradiction_checker.py:
 - Pass 3: Only after human approval (HITL interrupt_before already in lint_graph.py)
 
 Reduces context bloat in lint_contradiction.md prompt. Eliminates hallucinated
-contradictions from single-pass prompts. → D-34.
+contradictions from single-pass prompts. → D-40.
 
 ### Phase 2 UI Vision — Wiki Graph Browser (Not Another Chat UI)
 
@@ -392,7 +392,7 @@ Users need to see the Wiki growing to understand why Compilore is different from
 
 ### Format Selection UX (Hybrid — Gamma + Proactive Chips)
 
-Avoid static UI dropdowns as the primary control. Two paths (see **D-35**):
+Avoid static UI dropdowns as the primary control. Two paths (see **D-41**):
 1. **Natural language in query** — "show this as a mind map", "make a comparison table",
    "prepare slides from this" → `query_graph.py` / synthesizer parses `output_format` intent.
 2. **Proactive suggestion chips** — rule-based `format_evaluator.py` inspects answer metadata
@@ -413,3 +413,157 @@ LLM-based format evaluation deferred to Phase 2 when `wiki_log` chip-click data 
 7. **Markmap in Next.js:**
    What is the cleanest integration of Markmap renderer in a Next.js 15 app?
    SSR implications?
+
+---
+
+## DR-6: Analiza Biznesowa GIS Engine — Dane Rynkowe (2026-04-12)
+
+### Dane finansowe konkurencji (KRS)
+
+- **OnGeo.pl** (lider raportów o terenie): przychód 2024 = 1.3M PLN, spadek 47% r/r, strata netto -177k PLN. Model transakcyjny (tanie raporty per-query) = udowodniony ślepy zaułek na polskim rynku.
+- **Model B2B Enterprise subskrypcja** jest jedyną viable ścieżką. Precedens: **inFakt** (compliance podatkowy) → przejęty przez Visma przy wzroście 73.8% r/r. Identyczny model: deterministyczna automatyzacja chaotycznego polskiego prawa.
+
+### Struktura kosztów biur architektonicznych
+
+- **Revit:** 11,825 PLN netto/rok/stanowisko (do 35,480 PLN/3 lata)
+- **ArchiCAD:** 854–1,465 PLN/msc/stanowisko
+- **Małe biuro 5 osób:** 50,000–70,000 PLN/rok tylko na CAD
+- **Implikacja:** subskrypcja 500–900 PLN/msc = „kolejna licencja”, nie osobna decyzja budżetowa. Ale musi mieć twardy ROI.
+
+### Benchmarki cenowe globalne
+
+- **Gridics** (USA, zoning analysis): $999/Property Zoning Report, $1,499/Development Feasibility Report, API $0.49–0.69/call
+- **Harvey AI:** $100M ARR w 3 lata, 92% adopcji w licencjach
+- **Spacemaker:** exit $240M do Autodesk. GTM: sprzedaż ROI bezpośrednio do deweloperów (nie architektów). +16% gęstość = miliony EUR dodatkowego zysku.
+
+### TAM/SAM (bottom-up, konserwatywne)
+
+- Deweloperzy MŚP ~4,000 × 12,000 PLN/rok = **48M PLN**
+- Biura architektoniczne ~8,000 × 4,000 PLN/rok = **32M PLN**
+- Eksperci ~5,000 × 2,000 PLN/rok = **10M PLN**
+- **TAM łącznie:** ~90M PLN (~22.5M USD)
+- Realistyczny SAM lata 1–2: ~5–10% TAM = **4.5–9M PLN**
+- Sufit $100M ARR wymaga ekspansji EU (Niemcy XPlanung, Czechy, Rumunia) lub pivot do Transaction+Generative Design
+
+### Scenariusze exit
+
+- **$2M ARR** → wycena $10–16M USD (5–8x multiple, CEE PropTech)
+- **$5M ARR** → wycena $25–40M USD
+- **Potencjalni kupcy:** Visma, Autodesk, CoStar, Otodom/OLX, wetransform (XPlanung), Esri
+
+### GTM — Harvey Playbook (kopiuj dosłownie)
+
+- NIE skaluj do 8,000 biur architektonicznych na starcie
+- Partnership z 1–2 największymi deweloperami jako co-builders
+- „Zero training on customer data” jako feature, nie checkbox
+- Metryki: X analiz chłonności/msc zamiast X tygodni pracy
+- **Spacemaker lesson:** pitch do CFO/CEO przez PLN zysku z PUM, nie przez oszczędność czasu asystenta
+
+### Ryzyka niezaadresowane przez raport
+
+- **Licencja zawodowa:** GIS Engine musi być „narzędzie informacyjne”, NIE „opinia urbanistyczna” (wymaga uprawnień). Każda odpowiedź: disclaimer + „Pokaż Źródło” GML record.
+- **EGiB quality fallback:** OpenStreetMap + ortofotomapa jako krzyżowa weryfikacja dla powiatów ze słabymi danymi EGiB
+- **Okno konkurencyjne:** OnGeo jest finansowo słaby ale może dodać OUZ feature. Buduj brand i pierwsze case studies przed sierpniem 2026.
+
+---
+
+## DR-7: GIS Spatial Engine — Pełna Analiza Biznesowa (2026-04-12)
+
+### Walidacja hipotezy: Painkiller vs Vitamin
+
+- **GIS Engine (Produkt B) = Painkiller:** neutralizuje ryzyko utraty 10–15M PLN na błędnym zakupie działki. Kupuje się z budżetu operacyjnego bez negocjacji.
+- **Compilore (Produkt A) = Vitamin:** usprawnia pracę, redukuje czas. Wymaga edukacji rynku i długiego cyklu sprzedaży.
+- W B2B **Painkiller zawsze wygrywa** cenowo i sprzedażowo.
+
+### Dane rynkowe (nowe, zweryfikowane)
+
+- **Deweloperzy:** ~140,000 mieszkań/rok 2026 (PZFD). Sektor rośnie 34% w 10 lat, 8 nowych firm/dzień. Kilkaset do 2,000+ aktywnych MŚP deweloperskich (5–50 projektów/rok) = primary segment.
+- **Fundusze:** 2,112 fundacji rodzinnych, 34 fundusze VC/PE Q1 2025, 4.3B EUR zainwestowane (Savills 2025) = secondary segment (dłuższy cykl sprzedaży, 3–6 miesięcy).
+- **Rzeczoznawcy:** 7,591 certyfikowanych aktywnych. Niższe ARPU (500–1,500 PLN) ale masowy ruch. Model Pay-Per-Report.
+- **Geoportal:** 6.1M sesji Q1–Q3 2025 (+kilkanaście % r/r). Potwierdza aktywny popyt bez podaży dobrego narzędzia.
+
+### Ekonomika procesu due diligence (dane twarde)
+
+Koszt manualnej analizy chłonności:
+
+- Działka 500–5,000 m²: 3,750–5,000 PLN netto (0.75–1.00 PLN/m²)
+- Działka 5,000–10,000 m²: 5,000–7,500 PLN netto (0.50–0.75 PLN/m²)
+- Czas realizacji: 7–21 dni roboczych
+- Cykl akwizycji jednej działki: 10–30 odrzuconych ofert przed wyborem jednej = koszt due diligence **30,000–200,000 PLN/zakup**
+- ROI subskrypcji 3,000 PLN/msc: zwrot w pierwszym tygodniu
+
+### Matematyka ARPU (potwierdzenie)
+
+- 50,000 PLN MRR przy 900 PLN/msc = 55 klientów → śmierć przez support
+- 50,000 PLN MRR przy 3,000 PLN/msc = 17 klientów → zarządzalne
+- 50,000 PLN MRR przy 5,000 PLN/msc = 10 klientów → optymalne dla solo foundera
+
+### Psychologia kupującego (Land Acquisition Manager)
+
+Dwa motywatory: **chciwość** (być pierwszym na rynku, mieć przewagę informacyjną) i **strach** (zakupić działkę wyrzuconą poza OUZ = błąd kończący karierę).
+
+**A-ha Moment w demo:** pokaż Conflict Alert na żywej działce z portfela klienta. Natychmiastowe uruchomienie obu motywatorów.
+
+NIE pitch jako „narzędzie oszczędzające czas”. **PITCH jako „tarcza chroniąca 10M PLN kapitału”.**
+
+### Ryzyka techniczne (Gemini + własna analiza)
+
+1. **Jakość GML:** szacowane 20–40%+ wadliwych plików w pierwszej fali (błędy topologii, nakładające się poligony, NULL atrybuty, błędne kodowanie znaków). Pipeline musi być defensywny: `ST_IsValid()` + `ST_MakeValid()` + logowanie wszystkich napraw.
+2. **Wersje XSD:** różne gminy używają różnych wersji schematu APP. Parser musi obsługiwać wersję 2.0 i wcześniejsze warianty.
+3. **API resilience:** Rejestr Urbanistyczny może nie być gotowy przed deadline'm sierpień 2026. Potrzebne trzy źródła danych z automatycznym failover: Rejestr API → Geoportal WFS → BIP scraper per gmina.
+4. **EGiB aktualność:** budynki w EGiB mogą być opóźnione o 6–18 msc. Każdy wynik OUZ musi pokazywać datę aktualizacji danych EGiB dla danego powiatu + ostrzeżenie jeśli dane starsze niż 180 dni.
+5. **Kodowanie znaków:** ISO-8859-2 vs UTF-8 w atrybutach tekstowych. Wymagana normalizacja na wejściu pipeline.
+
+### Decyzje produktowe wynikające z raportu
+
+- **Primary segment:** deweloperzy MŚP (szybki cykl, właściciel decyduje)
+- **Secondary segment:** fundusze PE/Family Offices (buduj pipeline, zamykaj po 6+ miesiącach)
+- **Tertiary:** rzeczoznawcy (Pay-Per-Report, nie subskrypcja)
+- **Pricing:** 2,000–4,000 PLN/msc (MŚP), 6,000–10,000 PLN/msc (Enterprise)
+- **Walidacja:** concierge test (3–5 ręcznych analiz) **PRZED** budową produktu
+
+---
+
+## DR-8: Analiza Prawna — Bariery dla GIS Spatial Engine (2026-04-12)
+
+### GREEN LIGHT — działania bezpieczne bez konsultacji prawnej
+
+- Pobieranie i komercyjne przetwarzanie GML POG/MPZP (public domain, ustawa o otwartych danych Dz.U. 2023 poz. 1524)
+- Odpytywanie ULDK API (GUGiK) po geometrii działki — bezpłatne i dozwolone komercyjnie
+- Generowanie parametrów zabudowy z POG (PostGIS `ST_Intersects`)
+- Obliczanie OUZ algorytmem geometrycznym
+- Conflict Alert MPZP vs POG
+- Sprzedaż jako „narzędzie informacyjne / Decision Support System”
+- Brak wymogu uprawnień zawodowych: zawód urbanisty zderegulowany ustawą z 9 maja 2014 r. Analiza chłonności nie jest „samodzielną funkcją techniczną” w rozumieniu art. 12 Prawa budowlanego.
+- EU AI Act: deterministyczne PostGIS SQL = **NIE** jest systemem AI w rozumieniu rozporządzenia 2024/1689. Zero wymogów certyfikacyjnych.
+
+### RED LIGHT — absolutne zakazy
+
+- Pobieranie numerów Ksiąg Wieczystych (NSA 2025–26: KW = dana osobowa, UODO aktywnie egzekwuje)
+- Łączenie TERYT działki z danymi właściciela
+- Generowanie wizualizacji brył architektonicznych (szara strefa art. 12 Prawa budowlanego)
+- Terminologia: „opinia urbanistyczna”, „projekt architektoniczny”, „operat”, „ostateczna weryfikacja inwestycyjna”
+
+### KLUCZOWE PODSTAWY PRAWNE
+
+- **Art. 417 KC:** gmina odpowiada za błędne dane w GML (nie Compilore). Warunek: timestamp + source ID na każdym wyniku systemu.
+- **Art. 473 § 1 KC:** Liability Cap skuteczny w B2B. Max roszczenie = 12 miesięcy subskrypcji. Wyłączenie *lucrum cessans*.
+- **RODO:** dane planistyczne (geometria) poza RODO. Monitoring portfela klientów JDG = wymaga DPA jako załącznik do ToS.
+- **PLD 2024/2853:** nowa dyrektywa o odpowiedzialności za oprogramowanie wchodzi do **9 grudnia 2026**. ToS musi być wdrożony przed tą datą.
+- **AI Act art. 50:** tylko jeśli dodajesz LLM interfejs — wymóg transparency (komunikat że odpowiedź generowana maszynowo). **NIE** Annex III (High-Risk).
+
+### WYMAGANY DISCLAIMER (wzór prawny)
+
+Każdy wynik systemu musi zawierać:
+
+> Zestawienie parametrów przestrzennych wygenerowane automatycznie na podstawie otwartych rejestrów publicznych [nazwa pliku GML, data pobrania, ID rekordu]. Dokument ma charakter wyłącznie informacyjny i nie stanowi opinii urbanistycznej ani dokumentacji projektowej. Wymagana weryfikacja przez uprawnionego specjalistę przed podjęciem decyzji inwestycyjnych. Odpowiedzialność za treść danych źródłowych ponoszą właściwe organy administracji publicznej (art. 417 KC).
+
+### PRAWNIK WYMAGANY PRZED LAUNCH (lista)
+
+1. ToS: Liability Cap + indemnification clause (art. 473 KC + PLD)
+2. DPA dla funkcji monitoringu portfela
+3. Potwierdzenie że pipeline nie pobiera KW
+4. Disclaimer w formie prawnie skutecznej klauzuli umownej
+5. AI Act art. 50 compliance jeśli LLM interfejs
+
+**Szacowany koszt:** 3,000–8,000 PLN jednorazowo.

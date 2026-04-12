@@ -1,5 +1,5 @@
 # Compilore — Hetzner + Coolify (brief §2). No secrets in image; use env + volumes.
-FROM python:3.11-slim
+FROM python:3.12-slim
 
 WORKDIR /app
 

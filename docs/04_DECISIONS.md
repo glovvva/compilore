@@ -5,7 +5,7 @@
 When a decision is reversed, the old entry is marked SUPERSEDED and a new entry added.
 This file answers "why did we do it this way?" forever.
 
-**Last updated:** 2026-04-11
+**Last updated:** 2026-04-12
 
 ---
 
@@ -25,6 +25,9 @@ This file answers "why did we do it this way?" forever.
 | D-10 | Payment stack (Phase 2) | Fakturownia + Przelewy24 | Stripe has no JPK_FA support. Polish B2B prefers bank transfer/BLIK | 2026-04-09 |
 | D-11 | Phase 2 auth | Kinde | SSO/SAML for enterprise clients. Migration from Supabase Auth at Phase 2 launch | 2026-04-09 |
 | D-12 | Adapter pattern | New isolated module for every new source/format | Core engine stays clean. Industry logic never bleeds into base | 2026-04-09 |
+| D-33 | APIResponse[T] envelope | Required on all JSON routes | Agent-readiness: external integrations (Viktor, future MCP) need structured metadata. Learned from GapRoll cross-project reference. Implemented via HTTP middleware for auto `processing_time_ms` injection. | 2026-04-12 |
+| D-34 | `module` column on `wiki_log` and `documents` | All rows must set `module` = source adapter/module name | Prevents migration hell at scale. 500 logs with `module=NULL` = undebuggable. Lesson from GapRoll. | 2026-04-12 |
+| D-35 | Max 3 compile retries in `ingest_compile_graph` | `max_retries=3`, `compile_retry_count` tracked in state | Prevents agentic loop of death in compile path. 3 failures = structural document problem, not transient error. | 2026-04-12 |
 
 ---
 
@@ -80,12 +83,43 @@ This file answers "why did we do it this way?" forever.
 
 | # | Decision | Choice | Rationale | Date |
 |---|---|---|---|---|
-| D-33 | Presentation output format | Marp → PPTX (not Slidev) | Slidev requires Vue syntax — high LLM hallucination risk. Marp: pure Markdown with --- separators → PPTX/PDF. Export fidelity critical for enterprise use. | 2026-04-11 |
-| D-34 | Lint contradiction check architecture | Gated 3-pass: Detect → Plan → Implement (HITL between each) | Single-pass prompts produce hallucinated contradictions. 3-pass: pass 1 lists conflicts, pass 2 proposes merges, pass 3 only after human approval. Reduces context bloat. | 2026-04-11 |
-| D-35 | Format selection UX | Proactive suggestion chips + natural language (hybrid) | Rule-based heuristics evaluate answer shape after synthesis → suggest 1-2 relevant formats as clickable chips. User can also type format intent in natural language. Heuristics: ≥3 entities with parallel attributes → comparison_table; ≥4 wiki_pages of different types → mindmap; ≥3 sequential steps → protocol; single long content → card. Rule-based = $0, zero latency. LLM-based format evaluation deferred to Phase 2 when usage data exists. | 2026-04-11 |
-| D-36 | Mind map renderer | Markmap (not Mermaid, not D3.js) | LLM outputs standard nested Markdown. Markmap renders as SVG. ~30 token cost, zero hallucination risk, zero extra LLM call. D3.js rejected: coordinate state persistence is unsolved engineering problem for dynamic AI-generated nodes. | 2026-04-11 |
-| D-37 | Phase 2 UI paradigm | Wiki Graph Browser (not chat UI) | Spatial epistemology model (Heptabase). Concept pages as nodes, [[wikilinks]] as edges. Compounding must be visually explicit — this is Compilore's core differentiator vs RAG. | 2026-04-11 |
-| D-38 | Response card design | F-pattern + atomic interactivity + delta-first | Cognitive load research: users scan F-pattern, atomic cards require no navigation, delta (change over time) is more actionable than raw scores. Every response card: conclusion headline, source chips, confidence delta, Save-to-Wiki toggle in-card. | 2026-04-11 |
+| D-39 | Presentation output format | Marp → PPTX (not Slidev) | Slidev requires Vue syntax — high LLM hallucination risk. Marp: pure Markdown with --- separators → PPTX/PDF. Export fidelity critical for enterprise use. | 2026-04-11 |
+| D-40 | Lint contradiction check architecture | Gated 3-pass: Detect → Plan → Implement (HITL between each) | Single-pass prompts produce hallucinated contradictions. 3-pass: pass 1 lists conflicts, pass 2 proposes merges, pass 3 only after human approval. Reduces context bloat. | 2026-04-11 |
+| D-41 | Format selection UX | Proactive suggestion chips + natural language (hybrid) | Rule-based heuristics evaluate answer shape after synthesis → suggest 1-2 relevant formats as clickable chips. User can also type format intent in natural language. Heuristics: ≥3 entities with parallel attributes → comparison_table; ≥4 wiki_pages of different types → mindmap; ≥3 sequential steps → protocol; single long content → card. Rule-based = $0, zero latency. LLM-based format evaluation deferred to Phase 2 when usage data exists. | 2026-04-11 |
+| D-42 | Mind map renderer | Markmap (not Mermaid, not D3.js) | LLM outputs standard nested Markdown. Markmap renders as SVG. ~30 token cost, zero hallucination risk, zero extra LLM call. D3.js rejected: coordinate state persistence is unsolved engineering problem for dynamic AI-generated nodes. | 2026-04-11 |
+| D-43 | Phase 2 UI paradigm | Wiki Graph Browser (not chat UI) | Spatial epistemology model (Heptabase). Concept pages as nodes, [[wikilinks]] as edges. Compounding must be visually explicit — this is Compilore's core differentiator vs RAG. | 2026-04-11 |
+| D-44 | Response card design | F-pattern + atomic interactivity + delta-first | Cognitive load research: users scan F-pattern, atomic cards require no navigation, delta (change over time) is more actionable than raw scores. Every response card: conclusion headline, source chips, confidence delta, Save-to-Wiki toggle in-card. | 2026-04-11 |
+
+---
+
+## GIS SPATIAL ENGINE — PRODUCT & GTM (DR-7, 2026-04-12)
+
+*IDs D-45–D-49: numeracja „D-33–D-37” z DR-7 przesunięta, bo D-33–D-35 w LOCKED dotyczą już API envelope / `module` / compile retries.*
+
+| # | Decision | Choice | Rationale | Date |
+|---|---|---|---|---|
+| D-45 | Primary product pivot | GIS Spatial Engine jako produkt priorytetowy, Compilore jako secondary | Painkiller > Vitamin; wyższe ARPU; krótszy czas do walidacji | 2026-04-12 |
+| D-46 | Primary customer segment | Deweloperzy MŚP (5–50 projektów/rok), nie fundusze PE | Krótszy cykl sprzedaży (1–3 tyg. vs 3–6 msc); właściciel decyduje bez procurement | 2026-04-12 |
+| D-47 | GIS data resilience | Trzy źródła z failover: Rejestr Urbanistyczny API → Geoportal WFS → BIP scraper. Nie uzależniać od jednego źródła | Rejestr Urbanistyczny może nie być gotowy przed sierpniem 2026 | 2026-04-12 |
+| D-48 | Legal disclaimer mandatory | Każda odpowiedź systemu musi zawierać: „Dane informacyjne z rejestrów publicznych. Wymagana weryfikacja przez uprawnionego specjalistę przed złożeniem wniosku WZ” | Ochrona przed ryzykiem prawnym (opinia urbanistyczna może wymagać uprawnień) | 2026-04-12 |
+| D-49 | Concierge test before build | 3–5 ręcznych analiz OUZ+POG dla deweloperów za 500–1,500 PLN przed budową produktu | Walidacja WTP empirycznie, nie teoretycznie | 2026-04-12 |
+
+---
+
+## GIS SPATIAL ENGINE — LEGAL & COMPLIANCE (DR-8, 2026-04-12)
+
+*W briefie DR-8 użyto oznaczeń D-38–D-45. Tutaj nadano **D-50–D-57**, aby zachować unikalność względem istniejących D-39–D-49 (format wyjściowy + GIS GTM). Treść decyzji = DR-8.*
+
+| # | Decision | Choice | Rationale | Date |
+|---|---|---|---|---|
+| D-50 | Terminologia produktu | Tylko: „raport parametrów przestrzennych”, „kalkulacja algorytmiczna”, „zestawienie danych wektorowych”. Zakaz terminologii zawodów regulowanych | Ustawa 2014 deregulacja + granica art. 12 PB. Priorytet: krytyczny | 2026-04-12 |
+| D-51 | Timestamp na każdym wyniku | Źródło pliku GML + data + ID rekordu na każdym parametrze. Logi po stronie serwera | Art. 417 KC — przeniesienie odpowiedzialności na gminę. Priorytet: krytyczny | 2026-04-12 |
+| D-52 | Liability Cap w ToS | Max = 12 msc subskrypcji. Wyłączenie *lucrum cessans*. Indemnification clause | Art. 473 § 1 KC + PLD 2024/2853. Krytyczny — prawnik przed launch | 2026-04-12 |
+| D-53 | Zero KW w systemie | Absolutny zakaz pobierania KW | NSA 2025–26, UODO. Priorytet: krytyczny | 2026-04-12 |
+| D-54 | DPA monitoring portfela | DPA jako załącznik ToS dla funkcji śledzenia działek | RODO — klienci JDG. Przed launch | 2026-04-12 |
+| D-55 | UI: tabele i mapy, nie bryły | Parametry + mapy stref, nigdy wizualizacje architektoniczne | Granica art. 12 PB. Decyzja produktowa | 2026-04-12 |
+| D-56 | ToS przed PLD grudzień 2026 | Wdrożyć umowy przed 9 grudnia 2026 | PLD 2024/2853. Ważny — timing | 2026-04-12 |
+| D-57 | Multitenancy izolacja | Portfel każdego klienta w izolowanej przestrzeni danych | RODO art. 25. Wymóg techniczny | 2026-04-12 |
 
 ---
 
@@ -106,6 +140,9 @@ These are real questions, but not yet time to answer them:
 | Voice interface | Phase 4 | — |
 | 385-document statistical validation | Phase 2 production | Phase 2 |
 | Proactivity / push notifications | Phase 3 | — |
+| Exit strategy timing | Przy $1–2M ARR ocenić czy EU expansion vs Transaction platform vs exit | Rok 2–3 |
+| Weryfikacja prawna: czy „analiza informacyjna GIS” wymaga uprawnień urbanistycznych? | Konsultacja prawnik | Phase 2 Sprint 0, **PRZED launch** |
+| OpenStreetMap fallback dla OUZ | Gdy jakość danych EGiB poniżej 70% dla danego powiatu | Phase 2 Sprint 1 |
 
 ---
 

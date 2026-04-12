@@ -15,6 +15,7 @@ from typing import Any
 
 import anthropic
 
+from src.lib.supabase import schedule_insert_wiki_log_row
 from src.modules.compile.models import WikiPage
 from src.modules.compile.prompts import load_compile_prompt
 from src.modules.ingest.models import IngestResult
@@ -96,3 +97,27 @@ def compile_wiki_pages(
 
     pages = [WikiPage.model_validate(item) for item in parsed]
     return pages, input_tokens, output_tokens, cost
+
+
+def schedule_wiki_generator_compile_log(
+    *,
+    tenant_id: str,
+    document_id: str,
+    pages: list[WikiPage],
+    input_tokens: int,
+    output_tokens: int,
+    cost_usd: float,
+) -> None:
+    """After compile pages are persisted, log ``wiki_log`` for the wiki_generator module."""
+    schedule_insert_wiki_log_row(
+        tenant_id=tenant_id,
+        operation="compile",
+        module="wiki_generator",
+        details={
+            "document_id": str(document_id),
+            "pages_created": len(pages),
+            "page_types": [p.page_type for p in pages],
+        },
+        tokens_used=int(input_tokens) + int(output_tokens),
+        cost_usd=float(cost_usd),
+    )

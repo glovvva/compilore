@@ -27,21 +27,30 @@ from src.lib.supabase import (
 from src.modules.compile.index_manager import append_compiled_pages_to_index
 from src.modules.compile.models import WikiPage
 from src.modules.compile.embed_chunks import embed_and_store_wiki_pages_chunks
-from src.modules.compile.wiki_generator import DEFAULT_MODEL, compile_wiki_pages
+from src.modules.compile.wiki_generator import (
+    DEFAULT_MODEL,
+    compile_wiki_pages,
+    schedule_wiki_generator_compile_log,
+)
 from src.modules.compile.wiki_log import append_compile_cost_line
 from src.modules.compile.wiki_storage import write_wiki_page_files
 from src.modules.ingest.markdown_adapter import MarkdownIngestAdapter
 from src.modules.ingest.models import ingest_result_from_mapping, ingest_result_to_mapping
 from src.modules.ingest.pdf_text_adapter import PdfTextIngestAdapter
 from src.modules.ingest.text_adapter import TextIngestAdapter
+from src.modules.ingest.text_paste_adapter import paste_to_ingest_result
 from src.modules.ingest.url_adapter import extract_url
 
 
 class IngestCompileState(TypedDict, total=False):
     """LangGraph state (JSON-serializable values for ``MemorySaver``)."""
 
+    max_retries: int
+    compile_retry_count: int
     temp_path: str
     source_url: str
+    paste_body: str
+    paste_title: str
     original_filename: str
     tenant_id: str
     ingest: dict[str, Any]
@@ -55,6 +64,17 @@ class IngestCompileState(TypedDict, total=False):
     wiki_page_ids_by_slug: dict[str, str]
     chunks_embedded: int
     error: Optional[str]
+
+
+def _ingest_adapter_module(doc_type: str) -> str:
+    """``documents.module`` — matches ingestion adapter module names."""
+    return {
+        "markdown": "markdown_adapter",
+        "text": "text_adapter",
+        "pdf": "pdf_text_adapter",
+        "url": "url_adapter",
+        "paste": "text_paste_adapter",
+    }.get(doc_type, "unknown_adapter")
 
 
 def resolve_wiki_root() -> Path:
@@ -76,6 +96,20 @@ def _default_tenant_id() -> str:
 def node_read_document(state: IngestCompileState) -> dict[str, Any]:
     if state.get("error"):
         return {}
+    paste_body = state.get("paste_body")
+    if paste_body is not None:
+        try:
+            ingest = paste_to_ingest_result(
+                str(paste_body),
+                state.get("paste_title") or "Pasted Text",
+            )
+        except ValueError as exc:
+            return {"error": str(exc)}
+        return {
+            "ingest": ingest_result_to_mapping(ingest),
+            "document_title": ingest.display_title(),
+        }
+
     url = (state.get("source_url") or "").strip()
     if url:
         try:
@@ -118,19 +152,42 @@ def node_read_document(state: IngestCompileState) -> dict[str, Any]:
 
 
 def node_compile_wiki(state: IngestCompileState) -> dict[str, Any]:
-    if state.get("error"):
+    err_existing = state.get("error")
+    if err_existing and not str(err_existing).startswith("Compile failed:"):
         return {}
+    max_r = int(state["max_retries"]) if state.get("max_retries") is not None else 3
+    if err_existing and str(err_existing).startswith("Compile failed:"):
+        if int(state.get("compile_retry_count") or 0) >= max_r:
+            return {}
     try:
         ingest = ingest_result_from_mapping(state["ingest"])
         pages, in_tok, out_tok, cost = compile_wiki_pages(ingest)
     except Exception as exc:
-        return {"error": f"Compile failed: {exc}"}
+        new_count = int(state.get("compile_retry_count") or 0) + 1
+        return {"error": f"Compile failed: {exc}", "compile_retry_count": new_count}
     return {
         "wiki_pages": [p.model_dump(mode="json") for p in pages],
         "claude_input_tokens": in_tok,
         "claude_output_tokens": out_tok,
         "claude_cost_usd": float(cost),
+        "error": None,
+        "compile_retry_count": 0,
     }
+
+
+def route_after_compile(state: IngestCompileState) -> str:
+    """After compile: continue, retry compile, or stop (no infinite compile loop)."""
+    err = state.get("error")
+    if not err:
+        return "store_to_supabase"
+    err_s = str(err)
+    if err_s.startswith("Compile failed:"):
+        max_r = int(state["max_retries"]) if state.get("max_retries") is not None else 3
+        cnt = int(state.get("compile_retry_count") or 0)
+        if cnt >= max_r:
+            return "abort"
+        return "compile_wiki"
+    return "abort"
 
 
 def node_store_to_supabase(state: IngestCompileState) -> dict[str, Any]:
@@ -146,7 +203,9 @@ def node_store_to_supabase(state: IngestCompileState) -> dict[str, Any]:
             "frontmatter": ingest.frontmatter,
         }
         file_path = state.get("temp_path")
-        if ingest.doc_type == "url":
+        if ingest.doc_type == "paste":
+            file_path = None
+        elif ingest.doc_type == "url":
             su = ingest.frontmatter.get("source_url")
             if isinstance(su, str) and su.strip():
                 file_path = su.strip()
@@ -157,6 +216,7 @@ def node_store_to_supabase(state: IngestCompileState) -> dict[str, Any]:
             doc_type=ingest.doc_type,
             file_path=file_path,
             metadata=metadata,
+            module=_ingest_adapter_module(ingest.doc_type),
         )
         slug_to_id = insert_wiki_pages_for_document(
             client,
@@ -166,6 +226,14 @@ def node_store_to_supabase(state: IngestCompileState) -> dict[str, Any]:
         )
     except Exception as exc:
         return {"error": f"Supabase persist failed: {exc}"}
+    schedule_wiki_generator_compile_log(
+        tenant_id=tenant_id,
+        document_id=doc_id,
+        pages=pages,
+        input_tokens=int(state.get("claude_input_tokens", 0)),
+        output_tokens=int(state.get("claude_output_tokens", 0)),
+        cost_usd=float(state.get("claude_cost_usd", 0)),
+    )
     return {"document_id": doc_id, "wiki_page_ids_by_slug": slug_to_id}
 
 
@@ -277,7 +345,15 @@ def build_ingest_compile_graph() -> Any:
 
     builder.add_edge(START, "read_document")
     builder.add_edge("read_document", "compile_wiki")
-    builder.add_edge("compile_wiki", "store_to_supabase")
+    builder.add_conditional_edges(
+        "compile_wiki",
+        route_after_compile,
+        {
+            "store_to_supabase": "store_to_supabase",
+            "compile_wiki": "compile_wiki",
+            "abort": END,
+        },
+    )
     builder.add_edge("store_to_supabase", "embed_and_store_chunks")
     builder.add_edge("embed_and_store_chunks", "write_wiki_files")
     builder.add_edge("write_wiki_files", "git_commit")
@@ -304,6 +380,8 @@ def run_ingest_compile(
             "original_filename": original_filename,
             "tenant_id": tid,
             "error": None,
+            "max_retries": 3,
+            "compile_retry_count": 0,
         },
         config={"configurable": {"thread_id": thread_id}},
     )
@@ -331,6 +409,38 @@ def run_ingest_compile_from_url(
             "original_filename": raw_url,
             "tenant_id": tid,
             "error": None,
+            "max_retries": 3,
+            "compile_retry_count": 0,
+        },
+        config={"configurable": {"thread_id": thread_id}},
+    )
+    err = out.get("error")
+    if err:
+        return [], str(err)
+    raw_pages = out.get("wiki_pages") or []
+    pages = [WikiPage.model_validate(p) for p in raw_pages]
+    return pages, None
+
+
+def run_ingest_compile_from_paste(
+    *,
+    content: str,
+    title: str = "Pasted Text",
+    tenant_id: str | None = None,
+) -> tuple[list[WikiPage], str | None]:
+    """Execute ingest→compile for raw pasted text (no file upload)."""
+    graph = build_ingest_compile_graph()
+    tid = (tenant_id or "").strip() or _default_tenant_id()
+    thread_id = f"ingest-paste-{uuid.uuid4()}"
+    out: IngestCompileState = graph.invoke(
+        {
+            "paste_body": content,
+            "paste_title": title,
+            "original_filename": "paste.txt",
+            "tenant_id": tid,
+            "error": None,
+            "max_retries": 3,
+            "compile_retry_count": 0,
         },
         config={"configurable": {"thread_id": thread_id}},
     )

@@ -1,10 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script>
+    window.SUPABASE_URL = "%%SUPABASE_URL%%";
+    window.SUPABASE_ANON_KEY = "%%SUPABASE_ANON_KEY%%";
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Compilore</title>
   <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/markmap-lib@0.17.2/dist/browser/index.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/markmap-view@0.17.2/dist/browser/index.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
   <style>
     :root {
       --bg: #0f0f0f;
@@ -46,6 +55,7 @@
     }
     label { display: block; font-size: 0.75rem; color: var(--muted); margin-bottom: 0.35rem; }
     input[type="url"],
+    input[type="text"],
     input[type="file"],
     textarea {
       width: 100%;
@@ -140,9 +150,135 @@
     #status-bar .msg.ok { color: var(--ok); }
     .empty-hint { color: var(--muted); font-style: italic; }
     .gk-reason { margin-top: 0.75rem; padding: 0.5rem; background: #0a0a0a; border-left: 2px solid var(--border); font-size: 0.78rem; color: var(--muted); }
+
+    .response-card {
+      margin-top: 0.75rem;
+      padding: 1rem;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .card-headline {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #ecece3;
+      margin: 0 0 8px;
+      line-height: 1.35;
+    }
+    .card-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 0.75rem;
+      align-items: center;
+      font-size: 0.78rem;
+      margin-bottom: 0.65rem;
+      color: var(--muted);
+    }
+    .confidence-badge {
+      padding: 0.15rem 0.45rem;
+      border-radius: 3px;
+      font-size: 0.75rem;
+      border: 1px solid var(--border);
+    }
+    .confidence-badge.high { color: var(--ok); border-color: #3d5a30; }
+    .confidence-badge.mid { color: #c9b84e; border-color: #5a5430; }
+    .confidence-badge.low { color: var(--err); border-color: #5a3030; }
+    .delta-up { color: var(--ok); }
+    .delta-down { color: var(--err); }
+    .card-sources {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin-bottom: 0.65rem;
+    }
+    .source-chip {
+      font-size: 0.72rem;
+      padding: 0.2rem 0.45rem;
+      border: 1px solid #3a3a3a;
+      border-radius: 999px;
+      color: var(--accent);
+      cursor: default;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .source-chip:hover { background: #1a1a1a; border-color: var(--accent); }
+    .card-body { margin-top: 0.25rem; }
+    .card-formats {
+      margin-top: 0.85rem;
+      padding-top: 0.65rem;
+      border-top: 1px solid var(--border);
+    }
+    .formats-label { font-size: 0.72rem; color: var(--muted); margin-right: 0.35rem; }
+    .format-chips { display: inline-flex; flex-wrap: wrap; gap: 0.35rem; }
+    .format-chip {
+      font-family: inherit;
+      font-size: 0.72rem;
+      padding: 0.25rem 0.5rem;
+      background: #1a1a1a;
+      border: 1px solid #3a3a3a;
+      color: var(--fg);
+      border-radius: 3px;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+    }
+    .format-chip:hover:not(:disabled) { background: #252525; border-color: #555; }
+    .format-chip:disabled { opacity: 0.5; cursor: wait; }
+    .format-chip.loading { pointer-events: none; opacity: 0.55; }
+    .card-action {
+      margin-top: 0.75rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .save-toggle {
+      font-family: inherit;
+      font-size: 0.8rem;
+      padding: 0.4rem 0.75rem;
+    }
+    .gatekeeper-status { font-size: 0.75rem; color: var(--muted); }
+
+    .overlay-panel {
+      display: none;
+      margin-top: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: #0a0a0a;
+      overflow: hidden;
+    }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.45rem 0.65rem;
+      background: #141414;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8rem;
+    }
+    .panel-header button {
+      padding: 0.2rem 0.5rem;
+      font-size: 0.75rem;
+    }
+    #mindmap-svg { display: block; width: 100%; height: 500px; background: #0f0f0f; }
+    .mermaid-wrap { padding: 1rem; overflow-x: auto; }
+    .comparison-wrap { padding: 0.75rem; overflow-x: auto; }
+    .comparison-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+    .comparison-table th, .comparison-table td { border: 1px solid var(--border); padding: 0.35rem 0.5rem; text-align: left; }
+    .comparison-table caption { caption-side: top; text-align: left; margin-bottom: 0.35rem; color: var(--muted); font-size: 0.78rem; }
+    .protocol-wrap { padding: 0.75rem 1rem; font-size: 0.85rem; }
+    .protocol-wrap ol { margin: 0.35rem 0 0 1.1rem; padding: 0; }
+    .protocol-wrap li { margin: 0.25rem 0; }
   </style>
 </head>
 <body>
+  <div id="login-section" style="display:none; max-width:400px; margin:80px auto; text-align:center;">
+    <h2>Compilore</h2>
+    <p>Enter your email to receive a magic link.</p>
+    <input id="login-email" type="email" placeholder="you@example.com" style="width:100%;padding:8px;margin-bottom:8px;" />
+    <button id="login-btn">Send magic link</button>
+    <p id="login-status" style="margin-top:12px;"></p>
+  </div>
+  <div id="main-ui" style="display:none;">
   <h1>Compilore</h1>
   <p class="tagline">Agentic knowledge compiler — ingest, compile, query (Phase 1 playground)</p>
 
@@ -156,6 +292,20 @@
     </div>
     <div class="err-inline" id="err-url" hidden></div>
     <div class="out" id="out-url"></div>
+  </section>
+
+  <section id="sec-paste">
+    <h2>Paste text · Wklej tekst</h2>
+    <label for="paste-title">Title (optional)</label>
+    <input type="text" id="paste-title" placeholder="Pasted Text" autocomplete="off" />
+    <label for="paste-body" style="margin-top: 0.65rem">Content</label>
+    <textarea id="paste-body" placeholder="Paste notes, email, snippet…"></textarea>
+    <div class="row">
+      <button type="button" id="btn-paste">Ingest paste</button>
+      <span class="spinner" id="spin-paste" aria-hidden="true"></span>
+    </div>
+    <div class="err-inline" id="err-paste" hidden></div>
+    <div class="out" id="out-paste"></div>
   </section>
 
   <section id="sec-file">
@@ -179,16 +329,107 @@
       <span class="spinner" id="spin-query" aria-hidden="true"></span>
     </div>
     <div class="err-inline" id="err-query" hidden></div>
-    <div class="out" id="out-query"></div>
+    <div class="out" id="out-query">
+      <div class="response-card" id="response-card" style="display:none">
+        <div class="card-headline" id="card-headline"></div>
+        <div class="card-meta">
+          <span class="confidence-badge" id="confidence-badge"></span>
+          <span class="page-count" id="page-count"></span>
+          <span class="cost-badge" id="cost-badge"></span>
+        </div>
+        <div class="card-sources" id="card-sources"></div>
+        <div class="card-body markdown-content md-body" id="card-body"></div>
+        <div class="card-formats" id="format-suggestions" style="display:none">
+          <span class="formats-label">Pokaż jako:</span>
+          <div class="format-chips" id="format-chips"></div>
+        </div>
+        <div class="card-action">
+          <button type="button" class="save-toggle" id="save-toggle" style="display:none">Zapisz do Wiki</button>
+          <span class="gatekeeper-status" id="gatekeeper-status"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="overlay-panel" id="mindmap-panel" style="display:none">
+      <div class="panel-header">
+        <span>Mapa myśli</span>
+        <button type="button" id="btn-close-mindmap">✕</button>
+      </div>
+      <svg id="mindmap-svg"></svg>
+    </div>
+    <div class="overlay-panel" id="graph-panel" style="display:none">
+      <div class="panel-header">
+        <span>Graf powiązań</span>
+        <button type="button" id="btn-close-graph">✕</button>
+      </div>
+      <div class="mermaid-wrap"><div class="mermaid" id="mermaid-container"></div></div>
+    </div>
+    <div class="overlay-panel" id="table-panel" style="display:none">
+      <div class="panel-header">
+        <span>Tabela porównawcza</span>
+        <button type="button" id="btn-close-table">✕</button>
+      </div>
+      <div class="comparison-wrap" id="comparison-container"></div>
+    </div>
+    <div class="overlay-panel" id="protocol-panel" style="display:none">
+      <div class="panel-header">
+        <span>Protokół</span>
+        <button type="button" id="btn-close-protocol">✕</button>
+      </div>
+      <div class="protocol-wrap" id="protocol-container"></div>
+    </div>
   </section>
 
   <footer id="status-bar">
     <span class="msg" id="status-msg">Ready.</span>
     <span class="msg" id="status-time"></span>
   </footer>
+  </div>
 
   <script>
-(function () {
+(async function () {
+  // Supabase init
+  const _sb = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+  let _token = null;
+
+  function _authHeaders(extra) {
+    return Object.assign({ "Authorization": "Bearer " + _token }, extra || {});
+  }
+
+  async function _initAuth() {
+    const { data: { session } } = await _sb.auth.getSession();
+    var mainUi = document.getElementById("main-ui");
+    if (session) {
+      _token = session.access_token;
+      document.getElementById("login-section").style.display = "none";
+      // show main UI (whatever the main container id is)
+      mainUi.style.display = "block";
+    } else {
+      document.getElementById("login-section").style.display = "block";
+      // hide main UI
+      mainUi.style.display = "none";
+    }
+    // handle magic link callback (token in URL hash)
+    _sb.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        _token = session.access_token;
+        document.getElementById("login-section").style.display = "none";
+        document.getElementById("main-ui").style.display = "block";
+      }
+    });
+  }
+
+  document.getElementById("login-btn").addEventListener("click", async function() {
+    const email = document.getElementById("login-email").value.trim();
+    if (!email) return;
+    const { error } = await _sb.auth.signInWithOtp({ email });
+    document.getElementById("login-status").textContent = error
+      ? "Error: " + error.message
+      : "Magic link sent! Check your email.";
+  });
+
+  await _initAuth();
+
   function formatDetail(detail) {
     if (detail == null) return "Unknown error";
     if (typeof detail === "string") return detail;
@@ -253,8 +494,254 @@
   async function safeJson(res) {
     var t = await res.text();
     if (!t) return null;
-    try { return JSON.parse(t); } catch (_) { return null; }
+    try {
+      var j = JSON.parse(t);
+      if (
+        res.ok &&
+        j &&
+        typeof j === "object" &&
+        Object.prototype.hasOwnProperty.call(j, "data") &&
+        Object.prototype.hasOwnProperty.call(j, "meta")
+      ) {
+        return j.data;
+      }
+      return j;
+    } catch (_) {
+      return null;
+    }
   }
+
+  var lastQueryCard = null;
+
+  function escapeHtml(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function confClass(c) {
+    var n = Number(c);
+    if (n > 0.8) return "high";
+    if (n >= 0.5) return "mid";
+    return "low";
+  }
+
+  function hidePanels() {
+    ["mindmap-panel", "graph-panel", "table-panel", "protocol-panel"].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.style.display = "none";
+    });
+  }
+
+  function renderMindmap(markdown) {
+    var panel = document.getElementById("mindmap-panel");
+    var svg = document.getElementById("mindmap-svg");
+    if (!panel || !svg) return;
+    panel.style.display = "block";
+    panel.querySelectorAll(".mindmap-fallback").forEach(function (n) {
+      n.remove();
+    });
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    try {
+      var mmNs = window.markmap;
+      var Transformer = mmNs && mmNs.Transformer;
+      if (!Transformer && window.markmapLib) Transformer = window.markmapLib.Transformer;
+      if (mmNs && mmNs.Markmap && Transformer) {
+        var transformer = new Transformer();
+        var result = transformer.transform(markdown || "# Empty");
+        var mm = mmNs.Markmap.create(svg);
+        mm.setData(result.root);
+        mm.fit();
+        return;
+      }
+    } catch (e) {
+      console.warn("Markmap render failed", e);
+    }
+    var pre = document.createElement("pre");
+    pre.className = "md-body mindmap-fallback";
+    pre.style.whiteSpace = "pre-wrap";
+    pre.style.margin = "0.75rem";
+    pre.textContent = markdown || "";
+    panel.appendChild(pre);
+  }
+
+  async function renderMermaidGraph(syntax) {
+    var panel = document.getElementById("graph-panel");
+    var box = document.getElementById("mermaid-container");
+    if (!panel || !box) return;
+    panel.style.display = "block";
+    box.removeAttribute("data-processed");
+    box.textContent = syntax || "graph TD\n  A[Empty]";
+    if (typeof mermaid !== "undefined") {
+      mermaid.initialize({ startOnLoad: false, theme: "dark", securityLevel: "loose" });
+      await mermaid.run({ nodes: [box] });
+    }
+  }
+
+  function renderResponseCard(data) {
+    lastQueryCard = data;
+    var card = document.getElementById("response-card");
+    card.style.display = "block";
+    document.getElementById("card-headline").textContent = data.headline || "";
+    var badge = document.getElementById("confidence-badge");
+    var c = typeof data.confidence === "number" ? data.confidence : 0;
+    badge.className = "confidence-badge " + confClass(c);
+    badge.textContent = "confidence " + c.toFixed(2);
+    var deltaEl = document.createElement("span");
+    if (data.confidence_delta) {
+      var d = String(data.confidence_delta);
+      deltaEl.textContent = (d.indexOf("-") === 0 ? "↓" : "↑") + d;
+      deltaEl.className = d.indexOf("-") === 0 ? "delta-down" : "delta-up";
+      deltaEl.style.marginLeft = "0.35rem";
+      badge.appendChild(deltaEl);
+    }
+    var chips = data.source_chips || [];
+    document.getElementById("page-count").textContent = chips.length ? chips.length + " sources" : "0 sources";
+    document.getElementById("cost-badge").textContent =
+      typeof data.cost_usd === "number" ? "$" + data.cost_usd.toFixed(4) : "";
+    var src = document.getElementById("card-sources");
+    src.innerHTML = "";
+    chips.forEach(function (ch) {
+      var span = document.createElement("span");
+      span.className = "source-chip";
+      span.textContent = (ch.title || ch.slug || "?") + " · " + (ch.page_type || "");
+      span.title = "slug: " + (ch.slug || "");
+      src.appendChild(span);
+    });
+    var body = document.getElementById("card-body");
+    var md = (data.body || "").trim();
+    if (typeof marked !== "undefined" && marked.parse) {
+      body.innerHTML = marked.parse(md, { breaks: true });
+    } else {
+      body.innerHTML = "<pre>" + escapeHtml(md) + "</pre>";
+    }
+    var fs = document.getElementById("format-suggestions");
+    var fc = document.getElementById("format-chips");
+    fc.innerHTML = "";
+    var sugg = data.suggested_formats || [];
+    if (sugg.length) {
+      fs.style.display = "block";
+      sugg.forEach(function (fmt) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "format-chip";
+        b.textContent = fmt;
+        b.title = (data.format_reasoning && data.format_reasoning[fmt]) || fmt;
+        b.addEventListener("click", function () {
+          applyFormatChip(fmt, false, b);
+        });
+        fc.appendChild(b);
+      });
+    } else {
+      fs.style.display = "none";
+    }
+    var saveBtn = document.getElementById("save-toggle");
+    if (data.gatekeeper_passed) {
+      saveBtn.style.display = "inline-block";
+      saveBtn.disabled = !!data.save_to_wiki;
+      saveBtn.textContent = data.save_to_wiki ? "Zapisano w Wiki" : "Zapisz do Wiki";
+      saveBtn.title = data.save_to_wiki
+        ? "Odpowiedź już zapisana przez gatekeeper."
+        : "Playground: pełny ręczny zapis z UI w kolejnej iteracji; obecnie zapis tylko gdy gatekeeper zatwierdzi.";
+      saveBtn.onclick = function () {
+        if (!data.save_to_wiki) {
+          setStatus("Ręczny zapis z karty — endpoint UI w przygotowaniu.", "ok");
+        }
+      };
+    } else {
+      saveBtn.style.display = "none";
+    }
+    var gk = document.getElementById("gatekeeper-status");
+    gk.textContent = data.save_to_wiki
+      ? "Zapisano automatycznie (gatekeeper)."
+      : (data.gatekeeper_passed ? "Gatekeeper: można zapisać." : "Gatekeeper: zapis wyłączony.");
+    if (data.gatekeeper_reasoning) {
+      gk.textContent += " — " + data.gatekeeper_reasoning.slice(0, 160) + (data.gatekeeper_reasoning.length > 160 ? "…" : "");
+    }
+  }
+
+  async function postFormatClick(fmt) {
+    try {
+      await fetch("/query/format_click", {
+        method: "POST",
+        headers: _authHeaders({ "Content-Type": "application/json" }),
+        body: JSON.stringify({
+          format: fmt,
+          answer_id: lastQueryCard && lastQueryCard.answer_id ? lastQueryCard.answer_id : null,
+        }),
+      });
+    } catch (_) {}
+  }
+
+  async function applyFormatChip(fmt, skipClickLog, chipEl) {
+    if (!lastQueryCard) return;
+    if (!skipClickLog) await postFormatClick(fmt);
+    if (chipEl) {
+      chipEl.disabled = true;
+      chipEl.classList.add("loading");
+    }
+    hidePanels();
+    try {
+      var res = await fetch("/query/format", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          answer_text: lastQueryCard.body,
+          source_chips: lastQueryCard.source_chips || [],
+          format: fmt,
+          query_text: lastQueryCard.headline || "",
+          answer_id: lastQueryCard.answer_id,
+        }),
+      });
+      var out = await safeJson(res);
+      if (!res.ok) {
+        setStatus("Format failed: " + (out && out.detail ? formatDetail(out.detail) : res.statusText), "err");
+        return;
+      }
+      if (out.format === "mindmap" && out.markmap_markdown) {
+        renderMindmap(out.markmap_markdown);
+      } else if (out.format === "graph" && out.mermaid_syntax) {
+        await renderMermaidGraph(out.mermaid_syntax);
+      } else if (out.format === "comparison_table" && out.html_table) {
+        var tp = document.getElementById("table-panel");
+        document.getElementById("comparison-container").innerHTML = out.html_table;
+        tp.style.display = "block";
+      } else if (out.format === "card") {
+        document.getElementById("card-headline").textContent = out.headline || "";
+        var bullets = (out.bullets || []).map(function (b) { return "<li>" + escapeHtml(b) + "</li>"; }).join("");
+        document.getElementById("card-body").innerHTML = "<ul>" + bullets + "</ul>";
+      } else if (out.format === "protocol") {
+        var pp = document.getElementById("protocol-panel");
+        var pc = document.getElementById("protocol-container");
+        var steps = (out.steps || []).map(function (s) { return "<li>" + escapeHtml(s) + "</li>"; }).join("");
+        pc.innerHTML = "<strong>" + escapeHtml(out.title || "Protocol") + "</strong><ol>" + steps + "</ol>";
+        pp.style.display = "block";
+      }
+      setStatus("Format OK: " + fmt, "ok");
+    } catch (e) {
+      setStatus("Format: network error", "err");
+    } finally {
+      if (chipEl) {
+        chipEl.disabled = false;
+        chipEl.classList.remove("loading");
+      }
+    }
+  }
+
+  document.getElementById("btn-close-mindmap").addEventListener("click", function () {
+    document.getElementById("mindmap-panel").style.display = "none";
+  });
+  document.getElementById("btn-close-graph").addEventListener("click", function () {
+    document.getElementById("graph-panel").style.display = "none";
+  });
+  document.getElementById("btn-close-table").addEventListener("click", function () {
+    document.getElementById("table-panel").style.display = "none";
+  });
+  document.getElementById("btn-close-protocol").addEventListener("click", function () {
+    document.getElementById("protocol-panel").style.display = "none";
+  });
 
   document.getElementById("btn-url").addEventListener("click", async function () {
     var url = document.getElementById("url-input").value.trim();
@@ -270,7 +757,7 @@
     try {
       var res = await fetch("/ingest/url", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: _authHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({ url: url }),
       });
       var data = await safeJson(res);
@@ -291,6 +778,53 @@
     }
   });
 
+  document.getElementById("btn-paste").addEventListener("click", async function () {
+    var body = document.getElementById("paste-body").value;
+    var title = document.getElementById("paste-title").value.trim();
+    showErr("err-paste", "");
+    document.getElementById("out-paste").innerHTML = "";
+    if (!body || !body.trim()) {
+      showErr("err-paste", "Paste some text first.");
+      setStatus("Paste ingest: empty content", "err");
+      return;
+    }
+    setLoading("spin-paste", ["btn-paste"], true);
+    setStatus("Queueing paste ingest…");
+    try {
+      var res = await fetch("/ingest/paste", {
+        method: "POST",
+        headers: _authHeaders({ "Content-Type": "application/json" }),
+        body: JSON.stringify({
+          content: body,
+          title: title || "Pasted Text",
+        }),
+      });
+      var data = await safeJson(res);
+      if (!res.ok) {
+        var d = data && data.detail != null ? formatDetail(data.detail) : res.statusText;
+        showErr("err-paste", d);
+        setStatus("Paste ingest failed: " + d, "err");
+        return;
+      }
+      var out = document.getElementById("out-paste");
+      out.innerHTML =
+        '<p class="meta-line"><strong>' +
+        String(data.status || "queued") +
+        "</strong> — " +
+        String(data.title || "") +
+        " · " +
+        String(data.word_count != null ? data.word_count : "?") +
+        " words. Compile runs in the background; refresh the Wiki or check logs when done.</p>";
+      setStatus("Paste ingest queued", "ok");
+    } catch (e) {
+      var net = e && e.message ? e.message : String(e);
+      showErr("err-paste", "Network error: " + net);
+      setStatus("Paste ingest: network error", "err");
+    } finally {
+      setLoading("spin-paste", ["btn-paste"], false);
+    }
+  });
+
   document.getElementById("btn-file").addEventListener("click", async function () {
     var input = document.getElementById("file-input");
     showErr("err-file", "");
@@ -305,7 +839,7 @@
     setLoading("spin-file", ["btn-file"], true);
     setStatus("Uploading file…");
     try {
-      var res = await fetch("/ingest", { method: "POST", body: fd });
+      var res = await fetch("/ingest", { method: "POST", headers: _authHeaders(), body: fd });
       var data = await safeJson(res);
       if (!res.ok) {
         var d = data && data.detail != null ? formatDetail(data.detail) : res.statusText;
@@ -327,7 +861,8 @@
   document.getElementById("btn-query").addEventListener("click", async function () {
     var q = document.getElementById("q-input").value.trim();
     showErr("err-query", "");
-    document.getElementById("out-query").innerHTML = "";
+    hidePanels();
+    document.getElementById("response-card").style.display = "none";
     if (!q) {
       showErr("err-query", "Enter a question.");
       setStatus("Query: empty question", "err");
@@ -338,7 +873,7 @@
     try {
       var res = await fetch("/query", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: _authHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({ question: q }),
       });
       var data = await safeJson(res);
@@ -348,40 +883,17 @@
         setStatus("Query failed: " + d, "err");
         return;
       }
-      var out = document.getElementById("out-query");
-      var md = (data.answer_markdown || "").trim();
-      if (!md) {
-        out.innerHTML = '<p class="empty-hint">No relevant pages found — empty answer from the model.</p>';
-        setStatus("Query OK — no answer body", "ok");
+      var md = (data.body || "").trim();
+      if (!md && data.format === "response_card") {
+        showErr("err-query", "No answer body returned.");
+        setStatus("Query OK — empty body", "ok");
         return;
       }
-      var html = typeof marked !== "undefined" && marked.parse
-        ? marked.parse(md, { breaks: true })
-        : "<pre>" + md.replace(/</g, "&lt;") + "</pre>";
-      var wrap = document.createElement("div");
-      wrap.innerHTML =
-        '<div class="md-body">' + html + "</div>" +
-        '<div class="save-badge">' +
-          (data.saved_to_wiki
-            ? "💾 Saved to Wiki"
-            : "🔍 Not saved") +
-        "</div>";
-      if (data.citations && data.citations.length) {
-        wrap.innerHTML += '<div class="citations">Citations: ' +
-          data.citations.map(function (c) { return "<code>" + String(c).replace(/</g, "&lt;") + "</code>"; }).join(" ") +
-          "</div>";
-      } else {
-        wrap.innerHTML += '<div class="citations empty-hint">No citations returned.</div>';
-      }
-      if (typeof data.cost_usd === "number") {
-        wrap.innerHTML += '<div class="meta-line">Estimated Claude cost (this query): $' + data.cost_usd.toFixed(4) + "</div>";
-      }
-      if (data.gatekeeper_reasoning) {
-        wrap.innerHTML += '<div class="gk-reason"><strong>Gatekeeper</strong> — ' +
-          String(data.gatekeeper_reasoning).replace(/</g, "&lt;") + "</div>";
-      }
-      out.appendChild(wrap);
+      renderResponseCard(data);
       setStatus("Query OK", "ok");
+      if (data.requested_format) {
+        await applyFormatChip(data.requested_format, true, null);
+      }
     } catch (e) {
       var net = e && e.message ? e.message : String(e);
       showErr("err-query", "Network error: " + net);

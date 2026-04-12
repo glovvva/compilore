@@ -28,6 +28,19 @@
 
 ---
 
+## API Design Rules
+
+API Design Rules (from GapRoll cross-project reference)
+
+- Every JSON endpoint returns `APIResponse[T]` with `meta` (`request_id`, `timestamp`, `processing_time_ms`) and optional `ai_context` (`ai_generated`, `model_used`, `cost_usd`).
+- `processing_time_ms` is injected automatically by HTTP middleware — never manually per route.
+- **Endpoint naming:** `POST /api/v1/{domain}/{action}`
+  - `domain` = noun: `wiki`, `ingest`, `lint`
+  - `action` = verb: `compile`, `query`, `ingest`, `run`, `stats`
+- **BANNED:** `/api/process`, `/api/dashboard-data`, `/api/get-info`
+
+---
+
 ## Phase 1 Tech Stack
 
 | Layer | Technology | Notes |
@@ -49,6 +62,7 @@
 | Hosting | Hetzner + Coolify | EU data sovereignty, €12.90/mo |
 | Monitoring | LangSmith | Token cost tracking per operation |
 | Wiki Version Control | Git (nested repo in `wiki/`) | Every compilation = atomic commit |
+| API Response | `APIResponse[T]` envelope (`src/lib/response.py`) | All JSON routes; middleware auto-injects `processing_time_ms` |
 
 ## Banned Technologies
 
@@ -144,6 +158,7 @@ Compilore/
 │   │   ├── supabase.py                 # Supabase client config + helpers
 │   │   ├── anthropic_client.py         # Claude API wrapper
 │   │   ├── openai_client.py            # Embeddings wrapper
+│   │   ├── response.py                 # APIResponse[T] envelope, ResponseMeta, AIContext, envelop() helper
 │   │   └── token_tracker.py            # Cost + page ratio monitoring → wiki_log
 │   ├── graphs/
 │   │   ├── ingest_compile_graph.py     # Upload → Extract → Compile → Embed → Store → Git
@@ -282,6 +297,8 @@ CREATE TABLE wiki_log (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 ```
+
+`module` column (see `sql/004_add_module_column.sql`): identifies source module — `wiki_generator` \| `synthesizer` \| `hybrid_search` \| `gatekeeper` \| `confidence_decay` \| `lint_graph` \| `output_formatter` (and related adapters where applicable).
 
 ### RLS Policies (tenant isolation on all tables)
 ```sql

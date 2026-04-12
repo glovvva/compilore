@@ -10,7 +10,11 @@ import anthropic
 
 from src.lib.anthropic_cost import anthropic_usd_from_usage
 from src.lib.json_llm import parse_json_object
-from src.lib.supabase import create_supabase_client, fetch_wiki_slugs_for_page_ids
+from src.lib.supabase import (
+    create_supabase_client,
+    fetch_wiki_slugs_for_page_ids,
+    schedule_insert_wiki_log_row,
+)
 from src.modules.query.models import ChunkResult, SynthesisResult
 
 SYNTHESIS_MODEL = "claude-sonnet-4-20250514"
@@ -93,6 +97,19 @@ def synthesize_answer(
     answer = str(parsed.get("answer_markdown") or "").strip()
     citations_raw = parsed.get("citations")
     citations = _normalize_citations(list(citations_raw)) if isinstance(citations_raw, list) else []
+
+    schedule_insert_wiki_log_row(
+        tenant_id=tenant_id,
+        operation="query",
+        module="synthesizer",
+        details={
+            "query_preview": question[:100],
+            "chunks_used": len(chunks),
+            "answer_length": len(answer),
+        },
+        tokens_used=in_tok + out_tok,
+        cost_usd=cost,
+    )
 
     return SynthesisResult(
         answer_markdown=answer,

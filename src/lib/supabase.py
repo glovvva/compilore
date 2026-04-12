@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import asyncio
 import os
+import threading
 from typing import Any, Optional
 
 from supabase import Client, create_client
@@ -69,6 +71,7 @@ def insert_document_row(
     doc_type: str,
     file_path: str | None,
     metadata: dict[str, Any],
+    module: str | None = None,
 ) -> str:
     """Insert a ``documents`` row; return new UUID string."""
     ensure_tenant_exists(client, tenant_id)
@@ -80,6 +83,8 @@ def insert_document_row(
         "status": "compiled",
         "metadata": metadata,
     }
+    if module is not None:
+        row["module"] = module
     try:
         res = client.table("documents").insert(row).execute()
     except Exception as exc:
@@ -211,3 +216,63 @@ def insert_wiki_page_row(
         msg = "wiki_pages insert failed"
         raise RuntimeError(msg)
     return str(data[0]["id"])
+
+
+def insert_wiki_log_row(
+    client: Client,
+    *,
+    tenant_id: str,
+    operation: str,
+    details: dict[str, Any],
+    tokens_used: int = 0,
+    cost_usd: float = 0.0,
+    module: str | None = None,
+) -> None:
+    """Append one row to ``wiki_log`` (best-effort callers should catch exceptions)."""
+    ensure_tenant_exists(client, tenant_id)
+    row: dict[str, Any] = {
+        "tenant_id": tenant_id,
+        "operation": operation,
+        "details": details,
+        "tokens_used": tokens_used,
+        "cost_usd": cost_usd,
+    }
+    if module is not None:
+        row["module"] = module
+    client.table("wiki_log").insert(row).execute()
+
+
+def schedule_insert_wiki_log_row(
+    *,
+    tenant_id: str,
+    operation: str,
+    details: dict[str, Any],
+    tokens_used: int = 0,
+    cost_usd: float = 0.0,
+    module: str | None = None,
+) -> None:
+    """Fire-and-forget ``insert_wiki_log_row`` (thread if no running asyncio loop)."""
+
+    def _run() -> None:
+        try:
+            client = create_supabase_client()
+            insert_wiki_log_row(
+                client,
+                tenant_id=tenant_id,
+                operation=operation,
+                details=details,
+                tokens_used=tokens_used,
+                cost_usd=cost_usd,
+                module=module,
+            )
+        except Exception:
+            pass
+
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = None
+    if loop is not None:
+        loop.create_task(asyncio.to_thread(_run))
+    else:
+        threading.Thread(target=_run, daemon=True).start()

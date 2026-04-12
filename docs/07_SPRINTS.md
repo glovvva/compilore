@@ -28,8 +28,9 @@
 - Cost per query: ~$0.018 ✅
 
 ### Known Issues / Debt
+- **Backlog:** test: middleware processing_time_ms injection (FastAPI JSON envelope)
 - Auth not implemented in web UI yet — Wiki Tree shows empty (RLS blocks unauthenticated requests)
-- psycopg2-binary not installed (minor)
+- [x] **Resolved:** `psycopg2-binary` — present in `requirements.txt` and dev venv (earlier debt item was stale)
 - LangSmith monitoring not connected
 - Model name `claude-3-5-haiku-20241022` in some places — update to `claude-haiku-4-5-20251001`
 - No text paste input endpoint (`/ingest/paste`)
@@ -90,6 +91,11 @@
 - [x] `/ingest/paste` endpoint — `text_paste_adapter.py` + playground UI
 - [x] Gatekeeper pre-check: hybrid_search before novelty eval (cosine > 0.85 check) — implemented via `gatekeeper_answer_precheck` + `gatekeeper_precheck_top_similarity` RPC (`hybrid_search.py`, `sql/004_gatekeeper_precheck_similarity.sql`)
 - [x] Gatekeeper / validate_setup use current Haiku model id (`claude-haiku-4-5-20251001`)
+- [x] `APIResponse[T]` envelope on all JSON routes
+- [x] `processing_time_ms` middleware (auto-inject)
+- [x] `module` column on `wiki_log` + `documents`
+- [x] `wiki_log` writes in `wiki_generator`, `synthesizer`, `hybrid_search`
+- [x] Max 3 compile retries guard in `ingest_compile_graph`
 - [ ] Connect LangSmith (set `LANGCHAIN_API_KEY` in .env)
 
 ---
@@ -291,6 +297,7 @@ Items that are defined but not yet assigned to a sprint:
 | Docling PDF parser | Phase 2 | MPZP processing |
 | Kreuzberg async PDF | Phase 2 | Replace PyMuPDF |
 | PII stripping middleware | Phase 2 | spaCy NER + RegEx |
+| PreResponseChecklist in gatekeeper | Quality | Self-verification loop after evaluation: gatekeeper checks own reasoning vs N×N×G criteria. ~14pp quality improvement per GapRoll harness research. TODO already in `gatekeeper.py` docstring. |
 | VLM fallback (GPT-4o Vision) | Phase 2 | Scanned pages/maps |
 | plan_ogolny_adapter.py | Phase 2 | Distinct from MPZP (reform 2026) |
 | Kinde auth migration | Phase 2 | SSO/SAML |

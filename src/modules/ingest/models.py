@@ -19,7 +19,7 @@ class IngestResult:
     body: str
     frontmatter: dict[str, Any]
     source_path: Path
-    doc_type: Literal["markdown", "text", "pdf", "url"]
+    doc_type: Literal["markdown", "text", "pdf", "url", "paste"]
 
     def display_title(self) -> str:
         """Prefer frontmatter ``title`` (markdown / url), then filename stem."""

@@ -1,0 +1,121 @@
+@import "tailwindcss";
+
+/* Precision Dark Tool — default dark; system light when no data-theme; explicit overrides */
+:root {
+  --background: oklch(0.08 0.005 265);
+  --surface: oklch(0.11 0.005 265);
+  --border: oklch(0.18 0.008 265);
+  --foreground: oklch(0.92 0.012 75);
+  --muted-foreground: oklch(0.55 0.008 265);
+  --accent: oklch(0.6 0.18 270);
+  --accent-green: oklch(0.45 0.12 160);
+  --accent-red: oklch(0.55 0.2 25);
+  --cost: oklch(0.75 0.15 80);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    --background: oklch(0.98 0.006 265);
+    --surface: oklch(1 0.003 265);
+    --border: oklch(0.88 0.01 265);
+    --foreground: oklch(0.15 0.02 265);
+    --muted-foreground: oklch(0.45 0.02 265);
+    --accent: oklch(0.52 0.18 270);
+    --accent-green: oklch(0.42 0.12 160);
+    --accent-red: oklch(0.5 0.2 25);
+    --cost: oklch(0.55 0.14 80);
+  }
+}
+
+html[data-theme="dark"] {
+  --background: oklch(0.08 0.005 265);
+  --surface: oklch(0.11 0.005 265);
+  --border: oklch(0.18 0.008 265);
+  --foreground: oklch(0.92 0.012 75);
+  --muted-foreground: oklch(0.55 0.008 265);
+  --accent: oklch(0.6 0.18 270);
+  --accent-green: oklch(0.45 0.12 160);
+  --accent-red: oklch(0.55 0.2 25);
+  --cost: oklch(0.75 0.15 80);
+}
+
+html[data-theme="light"] {
+  --background: oklch(0.98 0.006 265);
+  --surface: oklch(1 0.003 265);
+  --border: oklch(0.88 0.01 265);
+  --foreground: oklch(0.15 0.02 265);
+  --muted-foreground: oklch(0.45 0.02 265);
+  --accent: oklch(0.52 0.18 270);
+  --accent-green: oklch(0.42 0.12 160);
+  --accent-red: oklch(0.5 0.2 25);
+  --cost: oklch(0.55 0.14 80);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-foreground: var(--foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-green: var(--accent-green);
+  --color-accent-red: var(--accent-red);
+  --color-red: var(--accent-red);
+  --color-cost: var(--cost);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-instrument-serif);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}
+
+/* Compile log line enter (CSS only, ~180ms) */
+@keyframes compilore-log-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.compilore-log-line {
+  animation: compilore-log-in 180ms ease-out both;
+}
+
+/* Skeleton pulse using border tone — no spinners */
+@keyframes compilore-skeleton {
+  50% {
+    border-color: var(--accent);
+    opacity: 0.65;
+  }
+}
+
+.compilore-skeleton {
+  animation: compilore-skeleton 1.4s ease-in-out infinite;
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 200ms ease-out both;
+}
