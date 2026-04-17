@@ -149,6 +149,14 @@
 - [ ] Configure env vars in Coolify
 - [ ] Test from phone
 
+### Pilot infrastructure prerequisite (before Wojtek onboarding)
+
+- Add `organization_id` UUID NOT NULL column to `documents`, `wiki_pages`, `document_chunks` tables
+- Update RLS policies to filter by `organization_id` instead of per-user
+- Seed: `org_id = bartek_personal` for existing playground data, `org_id = hermes_pilot` for Wojtek
+- Estimated effort: 1 Supabase migration + 2 RLS policy updates (~half day)
+- Do this **before** Wojtek's first login — avoids data migration later
+
 ### Beta testers
 - [ ] Create Supabase Auth accounts for 3 users (Bartek + żona + friend)
 - [ ] Each user = separate tenant in Supabase
