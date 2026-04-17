@@ -290,6 +290,42 @@ Hetzner stays API-only. Local = personal use cost reduction only.
 
 ---
 
+## Pre-Pilot Sprint — HermesTools Readiness (2026-04-17)
+
+**Goal:** System ready for Wojtek's first login. No known quality 
+regressions for industrial catalog PDFs.
+**Trigger:** Domain/SSL setup complete (pending).
+
+### Infrastructure
+- [x] organization_id column added to all tenant tables
+- [x] RLS policies updated to org-scoped isolation
+- [x] hermes-pilot org seeded (id: a6d3721a-0000-0000-0000-000000000002)
+- [x] hybrid_search() updated with organization_id parameter
+- [ ] Run migration on Supabase: 
+      `supabase/migrations/20260417_organization_isolation.sql`
+- [ ] Add Wojtek's Supabase Auth account to hermes-pilot org 
+      (after domain/SSL)
+
+### PDF Quality
+- [x] docling_adapter.py implemented with TableFormer ACCURATE
+- [x] OOM safeguards: OMP_NUM_THREADS=1, page-by-page, gc.collect()
+- [x] PyMuPDF fallback preserved for simple text PDFs
+- [ ] Install docling: `pip install docling` in venv + 
+      update requirements.txt
+- [ ] Test: upload one KOLVER catalog PDF → verify tables extracted 
+      as Markdown → ask parametric question → verify citation 
+      includes page number
+
+### Pilot config
+- [ ] Update 09_PILOT.md trial reference from 7 days → 14 days 
+      (already in docs, confirm in any UI copy)
+- [ ] Verify Fakturownia invoice template has QR code for KSeF 
+      compatibility (manual check by Bartek)
+- [ ] Biała Lista: send NIP-2 update to US with bank account 
+      (manual action by Bartek — before first paid invoice)
+
+---
+
 ## Backlog (Unscheduled)
 
 Items that are defined but not yet assigned to a sprint:
@@ -311,7 +347,7 @@ Items that are defined but not yet assigned to a sprint:
 | Bento grid / response cards UI | UI | Sprint 4 |
 | n8n webhook → auto-ingest | Automation | Phase 2 |
 | Mobile PWA | Mobile | Phase 2+ |
-| Docling PDF parser | Phase 2 | MPZP processing |
+| Docling PDF parser | ✅ PULLED FORWARD | Implemented for HermesTools industrial catalogs (D-75). See src/modules/ingest/docling_adapter.py |
 | Kreuzberg async PDF | Phase 2 | Replace PyMuPDF |
 | PII stripping middleware | Phase 2 | spaCy NER + RegEx |
 | Technical Advisor query flow wiring | ICP — Technical Advisor | ✅ done 2026-04-16. Feature flag: TECHNICAL_ADVISOR_MODE=true in .env. Default off. Core query_graph.py untouched. |

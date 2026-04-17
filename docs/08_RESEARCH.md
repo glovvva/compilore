@@ -725,3 +725,196 @@ All five verticals share identical workflow architecture → same Compilore engi
 - Bulk upload flow needed — low-tech users will not self-onboard 300 PDFs via drag-and-drop
 - Citation requirement (D-72) upgrades from "strong preference" to "hard requirement, no display without citation"
 - VLM fallback priority increases: engineering tables in PDFs are frequently raster images (confirmed by report)
+
+---
+
+## DR-9: B2B SaaS Procurement in Polish SME Distribution (2026-04-17)
+
+**Source:** Deep Research report — "Strategic Market Entry and 
+Procurement Dynamics for B2B SaaS in the Polish HVAC and Electrical 
+Wholesale Sectors"
+
+### Procurement mechanics confirmed
+
+- **Decision maker:** Owner (Właściciel) or Managing Director 
+  (Prezes) — single-person call for 1,200–5,000 PLN/msc. No board 
+  vote needed. CFO involved only in mid-market (150–250 employees).
+- **Procurement cycle:** 1–3 months for SME; 3–6 months for 
+  mid-market. Month 1 = demo + champion identified. Month 2 = trial 
+  + ROI proof. Month 3 = owner review + sign.
+- **Champion role:** Head of Presales cannot sign PO. Must be armed 
+  with ROI calculator and Polish-language data security summary to 
+  convince owner. Vendor must treat champion as extension of sales 
+  force.
+- **Comarch footprint:** ~80,000 Polish companies on Comarch ERP 
+  Optima. "Integrates with Comarch" = massive trust signal even 
+  without deep integration. Note: HermesTools does NOT use Comarch — 
+  custom 10-year-old ERP (see D-80 for strategic angle).
+
+### Critical new findings
+
+**Biała Lista VAT (White List):** Every Polish SME accountant 
+verifies vendor bank account on government registry before signing. 
+Missing = high-risk flag, procurement stalls. Action logged as D-82.
+
+**KSeF (e-invoicing mandate):** Headframe Sp. z o.o. as foreign 
+vendor without Fixed Establishment in Poland = exempt from native 
+KSeF XML. Can issue PDF invoices. BUT: PDF must include QR code for 
+easy reconciliation in Comarch/Asseco by client's accountant. 
+Without QR code = friction at reconciliation = churn risk. 
+Verify Fakturownia template supports QR code.
+
+**14-day trial standard:** B2B SaaS standard in Poland. 7 days 
+insufficient — trial expires unused. Active onboarding mandatory 
+(self-serve fails in low-digital-maturity sector). Updated D-77, 
+09_PILOT.md.
+
+**Polish UI mandatory:** English-only = fatal adoption friction 
+outside Warsaw. HermesTools (Bielsko-Biała) = tier-2 city. 
+Technical advisors in dept ≠ Wojtek (tech-savvy exception). 
+Full Polish UI required Phase 2 day one. Logged as D-81.
+
+**Annual contract incentive:** Start month-to-month (risk-averse 
+owner). After 2–3 months successful use, offer annual with 
+~15–20% discount ("2 months free"). Polish SMEs are highly 
+sensitive to predictable OpEx optimization.
+
+---
+
+## DR-10: Competitive Landscape — Catalog Search in HVAC/Electrical (2026-04-17)
+
+**Source:** Deep Research report — "The Knowledge Compiler Paradigm: 
+Advanced Technical Document Search in the CEE HVAC and Electrical 
+Wholesale Market"
+
+### Market gap confirmed
+
+No independent SaaS product in Poland or CEE offers agnostic, 
+cross-catalog, parametric knowledge compiler for B2B technical 
+distribution. Confirmed gap.
+
+### Only relevant precedent: Grodno AiGRODNO
+
+Grodno S.A. (major Polish electrical wholesaler) deployed AiGRODNO 
+by Certusoft — AI purchasing assistant using LLMs + computer vision 
+to read electrical diagrams from PDFs. Reduces offer preparation 
+from hours to minutes (90% time reduction claimed). Grodno plans 
+120M PLN investment over 5 years in AI.
+
+**Key distinction:** AiGRODNO is proprietary to Grodno's inventory 
+and portal. Does not solve the agnostic multi-brand search problem 
+for independent distributors. This is exactly Compilore's gap.
+
+### Why standard RAG fails on engineering tables (confirmed)
+
+Five specific failure modes documented:
+1. **Chunking artifacts** — table headers severed from values at 
+   chunk boundary → LLM hallucinates
+2. **Irrelevant Top-K** — "heat pump deployment" retrieves ML 
+   deployment docs (semantic proximity, not technical match)
+3. **Vocabulary mismatch** — "DTR for 15kW unit" vs manufacturer 
+   calls it "Technical Operation Manual Model X15"
+4. **Lost in the middle** — correct table retrieved but LLM ignores 
+   values in center of context window
+5. **Hierarchical flattening** — "values in Table 4 apply only 
+   under conditions in Section 3.2" — flat extraction destroys 
+   this dependency
+
+Docling TableFormer solves failure mode #1. Our hybrid search 
+(BM25 + vector RRF) partially addresses #2 and #3. #4 and #5 
+are known risks at scale — mitigated by Gatekeeper grounding 
+criterion.
+
+### Architecture validation
+
+Compilore's Agentic 4-loop + Gatekeeper = correct architecture 
+for this problem. Raport confirms: "Agentic RAG provides the 
+deterministic, multi-variable filtering required for strict 
+engineering tasks." Our compiled Wiki (vs RAG amnesia) is 
+identified as a structural architectural moat.
+
+### New technology findings
+
+**ColPali (Vision RAG):** Embeds entire PDF pages as images, 
+bypasses OCR entirely. Prevents 40% information loss in 
+technical schematics. Relevant when catalogs are scanned/rasterized. 
+Logged as D-79 (Phase 2 Sprint 2 research item — assess after 
+Wojtek uploads first catalog batches).
+
+**Bielik-11B v3.0:** Polish-optimized open-source LLM. PLCC 
+score 71.8 vs GPT-3.5 43.3. 83% cost reduction vs large API 
+models. No hosted API yet — self-host only (requires GPU). 
+Logged as D-78 (Phase 2 experiment after 4 weeks pilot data).
+
+**Polish hybrid retrieval stack for maximum accuracy:**
+- BM25 (lexical) + dense vector (semantic) + sparse vector 
+  (SPLADE/ColBERT for Polish morphology)
+- Reduces retrieval miss rate from 69% (standard ChatGPT stack 
+  on Polish) to 6% (94% precision)
+- Our current BM25 + pgvector RRF is correct foundation. 
+  Adding SPLADE layer is Phase 2 enhancement.
+
+---
+
+## DR-11: HVAC Market Sizing — Poland & CEE (2026-04-17)
+
+**Source:** Deep Research report — "Deep Market Analysis: Validating 
+the Beachhead for AI-Powered Technical Search in the Polish and CEE 
+HVAC/R Distribution Sector"
+
+### Market size (Poland HVAC/R distribution)
+
+- Active companies: 1,800–2,500 (80% confidence)
+- Technical advisors/presales engineers: ~5,080 (75% confidence)
+- Target tier (10–250 employees): ~660 companies = 35% of market
+
+### TAM/SAM/SOM (HVAC + Electrical, Poland)
+
+| | HVAC only | HVAC + Electrical |
+|---|---|---|
+| TAM | 60M PLN/yr | ~100M PLN/yr |
+| SAM (35% maturity filter) | ~21M PLN/yr | ~35M PLN/yr |
+| SOM (10% SAM, 36 months) | ~2.1M PLN ARR | ~3.5M PLN ARR |
+
+**CEE regional TAM (HVAC + Electrical): ~273M PLN/yr**
+
+Note: HermesTools is industrial assembly tools distribution 
+(not HVAC) — smaller addressable market but identical workflow 
+structure. Same TAM methodology applies.
+
+### Regulatory tailwinds creating non-discretionary demand
+
+**F-Gas Regulation EU 2024/573:** 55–60% effective reduction 
+in F-gas quota 2025–2026. Engineers must now verify refrigerant 
+type (R410A banned, R32 A2L, R290 A3 flammable) AND cross-reference 
+minimum floor area calculations from safety manuals for every 
+quote. Manual process = nightmare. AI catalog search = compliance 
+necessity.
+
+**EPBD:** From Jan 2025, fossil fuel boiler incentives banned. 
+Distributors must re-educate sales force for heat pumps. Engineers 
+must extract SEER ≥8.5 and SCOP ≥5.1 for A+++ certification from 
+hundreds of databook pages.
+
+**Industrial assembly tools analog (HermesTools):** ISO 6789 
+calibration norm updates, PN/EN ESD safety standards, aerospace 
+certifications (RECOULES → aerospace clients) — same non-discretionary 
+compliance verification pressure, different documents.
+
+### EU Grants as GTM lever
+
+PARP Ścieżka SMART and NCBR STEP funding windows open in 2026. 
+Grants can fully subsidize client's Compilore license, eliminating 
+budget objection entirely. Implementation track (Cyfryzacja) 
+covers software purchase. Application window: Apr–May 2026 (PARP). 
+Logged as D-83. Assess after first paying client secured.
+
+### Top 20 HVAC distributors in Poland (key names for BD)
+
+Tier 1 (national/multinational): Sonepar Polska, Rexel Polska, 
+Onninen (Kesko), Klima-Therm, Bims Plus, Wienkra, Schiessl Polska.
+Tier 2 (national specialists): Systherm, Hydrosolar, Grodno S.A., 
+TIM S.A., Alfa Elektro, Centrum Klima, Iglotech, Ventia, Alnor.
+Tier 3 (regional): Dobra Klima, Klimat Komfort, Solar Polska.
+
+---

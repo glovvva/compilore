@@ -63,6 +63,7 @@ class QueryResponseCard(BaseModel):
         default=0.0,
         description="Total estimated Claude USD (synthesis + gatekeeper + headline)",
     )
+    parameter_filter_result: Optional[dict[str, int]] = None
     answer_id: str
     requested_format: Optional[str] = None
 

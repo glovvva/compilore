@@ -204,3 +204,19 @@ These are real questions, but not yet time to answer them:
 | D-60 | i18n strategy | Infrastructure-first: externalize strings now, translations deferred | Zero cost to do foundations correctly now; high retrofit cost later. | 2026-04-17 |
 
 ---
+
+## PRE-PILOT TECHNICAL DECISIONS (2026-04-17)
+
+| # | Decision | Choice | Rationale | Date |
+|---|---|---|---|---|
+| D-75 | PDF adapter routing | Docling (TableFormer ACCURATE) for industrial catalogs; PyMuPDF retained for simple text PDFs | Standard PyMuPDF chunking splits table headers from values — causes hallucinations on parametric queries. Docling preserves table structure as Markdown. Pull-forward from Phase 2 triggered by HermesTools pilot (KOLVER/HAZET/CLECO catalogs with torque tables). | 2026-04-17 |
+| D-76 | organization_id isolation timing | Implement NOW before Wojtek's first login | Avoids data migration later. bartek-playground and hermes-pilot get separate org_ids from day one. Half-day cost now vs. painful migration at 3+ clients. | 2026-04-17 |
+| D-77 | Trial length | 14 days (not 7) | DR-9 confirms: 14 days is B2B SaaS standard in Poland. 7 days insufficient for low-digital-maturity sector — trial expires unused before user sees value. Onboarding must be active, not self-serve. | 2026-04-17 |
+| D-78 | Bielik-11B | Research item for Phase 2 — NOT a current architecture decision | No hosted API exists. Self-hosting requires GPU (not available on Hetzner). Phase 1 stays on Claude Sonnet. Experiment: after 4 weeks of Wojtek pilot, run 50 real queries through Bielik-11B on RunPod vs Claude Sonnet. Switch if quality is comparable. 83% cost reduction at scale is significant. Speakleash team has large PL community reach — potential co-marketing if built on Bielik. | 2026-04-17 |
+| D-79 | ColPali / Vision RAG | Research item for Phase 2 Sprint 2 — NOT now | ColPali is state-of-art for rasterized table retrieval (prevents 40% information loss vs OCR). Most HermesTools catalogs are native PDFs — Docling handles these. ColPali relevant when scanning reveals >20% of catalogs are scanned/rasterized. Assess after Wojtek uploads first batches. | 2026-04-17 |
+| D-80 | HermesTools ERP angle | Long-term strategic position — not disclosed to Wojtek yet | HermesTools runs a 10-year-old custom ERP, nobody wants to touch it, new build stalled. Compilore sits alongside as intelligence layer now. If deeply integrated (live inventory overlay on search results), Compilore becomes de facto interface to their data — making old ERP even more isolated. Natural position for Phase 3. Do not mention this to Wojtek or his management at this stage. | 2026-04-17 |
+| D-81 | Polish UI | Hard requirement for Phase 2 launch — not optional | DR-9 confirms: English-only UI = fatal adoption friction in tier-2/3 Polish cities. HermesTools is Bielsko-Biała. Wojtek is tech-savvy (exception), but his colleagues in technical dept are not. Full Polish UI from day one of Phase 2. | 2026-04-17 |
+| D-82 | Biała Lista VAT | Bartek (Headframe Sp. z o.o.) must update bank account with US before first paying client | Polish SME CFOs verify all vendors on Biała Lista before signing. Missing bank account = vendor flagged as high-risk, procurement stalls. Action: send NIP-2 update to US with correct bank account. Timeline: 1-7 business days processing. Must complete before HermesTools company account proposal. | 2026-04-17 |
+| D-83 | EU grants as GTM lever | Research item — PARP Ścieżka SMART + NCBR STEP windows open now | Grants can fully subsidize client's Compilore license cost, eliminating budget objection. Application windows: Feb–Mar and Oct–Nov 2026 (PARP SME R&D); Apr–May 2026 (PARP Implementation). Need grant-writing partner (Crido / Grant Thornton). Assess after first paying client is secured. | 2026-04-17 |
+
+---

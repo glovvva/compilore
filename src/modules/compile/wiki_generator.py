@@ -5,6 +5,13 @@ Turns ingested text into interconnected Markdown pages using Claude and
 from the LangGraph pipeline.
 """
 
+# Technical Advisor ICP note:
+# - Adds page types: `product_entity`, `manufacturer_entity`.
+# - These are handled by `compile_technical_catalog.md` prompt instructions.
+# - The `wiki_generator.py` core loop is unchanged: it receives pages from the
+#   prompt pipeline, validates them, and stores them.
+# - `technical_parameters` JSONB field in frontmatter is passed through as-is.
+
 from __future__ import annotations
 
 import json

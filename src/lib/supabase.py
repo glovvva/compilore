@@ -242,6 +242,32 @@ def insert_wiki_log_row(
     client.table("wiki_log").insert(row).execute()
 
 
+async def get_user_organization_id(user_id: str) -> str | None:
+    """
+    Returns the primary organization_id for a given user.
+    Phase 1: each user has exactly one org.
+    Phase 2: will support multiple orgs per user.
+    """
+    client = create_supabase_client()
+
+    def _query() -> list[dict[str, Any]]:
+        result = (
+            client.table("org_members")
+            .select("organization_id")
+            .eq("user_id", user_id)
+            .limit(1)
+            .execute()
+        )
+        return getattr(result, "data", None) or []
+
+    rows = await asyncio.to_thread(_query)
+    if rows:
+        organization_id = rows[0].get("organization_id")
+        if organization_id:
+            return str(organization_id)
+    return None
+
+
 def schedule_insert_wiki_log_row(
     *,
     tenant_id: str,

@@ -119,6 +119,17 @@ testing behavior). The pilot must be smooth, well-documented, and closely monito
 *(This section becomes the basis for all future client onboarding docs)*
 
 ### Before first login
+**Prerequisites checklist (Bartek, before Wojtek's login):**
+- [ ] Domain/SSL configured and working
+- [ ] Wojtek's Supabase Auth account created and added to 
+      `hermes-pilot` organization (org_id: 
+      a6d3721a-0000-0000-0000-000000000002)
+- [ ] Docling installed: `pip install docling` in production venv
+- [ ] Test upload: one KOLVER or HAZET PDF — verify table 
+      extraction works and returns Markdown tables
+- [ ] Biała Lista: bank account update submitted to US 
+      (NIP-2 form) — must be processed before any paid invoice
+
 Bartek sends Wojtek:
 1. Login link + credentials
 2. This message (in Polish, see §6 below)

@@ -1,8 +1,13 @@
-"""Native-digital PDF text extraction for the **Ingest** loop (Phase 1).
+"""
+Simple PDF text adapter using PyMuPDF.
 
-Uses PyMuPDF page-by-page — embedded text only, **no OCR** (per brief). Page
-blocks are concatenated with explicit separators so the **Compile** loop can
-reason about document structure.
+USE THIS FOR: Simple text-heavy PDFs (articles, reports,
+  Markdown-heavy documents, single-column text)
+USE docling_adapter.py FOR: Industrial catalogs, datasheets,
+  any PDF with multi-column tables, engineering spec sheets,
+  parametric data tables.
+
+See docs/04_DECISIONS.md D-75 for the routing decision.
 """
 
 from __future__ import annotations

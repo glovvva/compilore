@@ -11,6 +11,7 @@ import logging
 import os
 import tempfile
 import time
+import hashlib
 from pathlib import Path
 from typing import Any
 
@@ -30,6 +31,7 @@ from src.graphs.ingest_compile_graph import (
 )
 from src.graphs.lint_graph import resume_lint, run_decay, run_lint
 from src.graphs.query_graph import run_query
+from src.config.settings import settings
 from src.modules.compile.models import WikiPage
 from src.modules.lint.report_history import fetch_last_lint_report
 from src.lib.response import AIContext, APIResponse, envelop
@@ -37,8 +39,12 @@ from src.lib.auth import get_current_tenant_id
 from fastapi import Depends
 
 from src.modules.query.format_analytics import log_format_chip_click
-from src.modules.query.models import QueryResponseCard
+from src.modules.query.models import QueryResponseCard, SynthesisResult
 from src.modules.query.output_formatter import transform_answer_to_format
+from src.modules.query.technical_advisor_query import run_technical_advisor_query
+from src.modules.query.compounding import save_answer_to_wiki
+from src.modules.query.gatekeeper import GatekeeperDecision
+from src.lib.supabase import create_supabase_client, insert_wiki_log_row
 
 app = FastAPI(
     title="Compilore",
@@ -144,6 +150,15 @@ class QueryFormatRequest(BaseModel):
     )
     query_text: str = ""
     answer_id: str | None = None
+
+
+class QuerySaveRequest(BaseModel):
+    """Manual Save-to-Wiki request body."""
+
+    question: str = Field(min_length=1)
+    answer_markdown: str = Field(min_length=1)
+    source_wiki_page_slugs: list[str] = Field(default_factory=list)
+    query_cost_usd: float = 0.0
 
 
 class FormatClickRequest(BaseModel):
@@ -289,7 +304,11 @@ async def query_wiki(
     tenant_id: str = Depends(get_current_tenant_id),
 ) -> APIResponse[QueryResponseCard]:
     """Ask a question against the compiled Wiki; returns F-pattern ``response_card`` JSON."""
-    result, err = await run_in_threadpool(run_query, body.question, tenant_id)
+    if settings.TECHNICAL_ADVISOR_MODE:
+        result = await run_technical_advisor_query(body.question, tenant_id)
+        err = None
+    else:
+        result, err = await run_in_threadpool(run_query, body.question, tenant_id)
     if err or result is None:
         raise HTTPException(status_code=502, detail=err or "Query produced no result")
     ai = AIContext(
@@ -297,6 +316,58 @@ async def query_wiki(
         cost_usd=result.cost_usd,
     )
     return envelop(result, ai_context=ai)
+
+
+@app.post("/query/save", response_model=APIResponse[dict[str, Any]])
+async def query_save(
+    body: QuerySaveRequest,
+    tenant_id: str = Depends(get_current_tenant_id),
+) -> APIResponse[dict[str, Any]]:
+    """Manually persist a query answer to the Wiki without changing auto-save flow."""
+    try:
+        slug = f"output-{hashlib.sha256(body.question.strip().encode('utf-8')).hexdigest()[:16]}"
+        client = create_supabase_client()
+        existing = (
+            client.table("wiki_pages")
+            .select("slug")
+            .eq("tenant_id", tenant_id)
+            .eq("slug", slug)
+            .limit(1)
+            .execute()
+        )
+        rows = getattr(existing, "data", None) or []
+        if rows:
+            return envelop({"saved": False, "reason": "already_exists", "slug": slug})
+
+        answer = SynthesisResult(
+            answer_markdown=body.answer_markdown,
+            citations=list(body.source_wiki_page_slugs),
+            cost_usd=float(body.query_cost_usd),
+        )
+        decision = GatekeeperDecision(
+            should_save=True,
+            reasoning="Manual user-initiated save via POST /query/save.",
+            confidence=1.0,
+        )
+        new_slug = await run_in_threadpool(
+            save_answer_to_wiki,
+            body.question,
+            answer,
+            decision,
+            tenant_id,
+        )
+        await run_in_threadpool(
+            insert_wiki_log_row,
+            client,
+            tenant_id=tenant_id,
+            operation="manual_save",
+            details={"question_preview": body.question[:100]},
+            cost_usd=float(body.query_cost_usd),
+            module="query_save_endpoint",
+        )
+        return envelop({"saved": True, "slug": new_slug})
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Manual save failed: {exc}") from exc
 
 
 @app.post("/query/format", response_model=APIResponse[dict[str, Any]])
