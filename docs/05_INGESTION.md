@@ -1,7 +1,7 @@
 # 05 — INGESTION
 ## Compilore: Source Adapters, Methods, Status
 
-**Last updated:** 2026-04-11
+**Last updated:** 2026-04-17
 
 ---
 
@@ -55,6 +55,17 @@ for prioritizing adapter development.
 | Hacker News threads | Algolia HN API | 🔲 planned |
 | Technical podcasts | RSS → Faster-Whisper | 🔲 planned |
 | Twitter/X threads | SociaVault API | 🔲 planned |
+
+### Profile D — Technical Advisor (Industrial Distribution)
+| Source | Method | Status |
+|---|---|---|
+| Manufacturer catalogs (PDF, native-digital) | PyMuPDF (pdf_text_adapter.py) + compile_technical_catalog.md prompt | ✅ ready (Phase 1, table extraction limited) |
+| Manufacturer catalogs (PDF, scanned) | Docling TableFormer ACCURATE | 🔲 Phase 2 |
+| Internal price lists / offers | pdf_text_adapter.py | ✅ ready (RODO note: Hetzner EU only) |
+| Word documents (.docx) | python-docx adapter | 🔲 planned |
+| Multi-language catalogs (PL/DE/EN) | Language detection + parameter normalization | 🔲 Phase 2 |
+
+**Note for pilot:** Before ingesting any internal pricing or client offers, confirm data residency with user (Hetzner EU). Public manufacturer catalogs have no restriction.
 
 ---
 

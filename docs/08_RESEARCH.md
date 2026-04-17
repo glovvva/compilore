@@ -4,7 +4,7 @@
 **This is a living document.** Each Deep Research session adds a new dated section.
 Findings here directly inform decisions logged in 04_DECISIONS.md.
 
-**Last updated:** 2026-04-12
+**Last updated:** 2026-04-17
 
 ---
 
@@ -416,6 +416,91 @@ LLM-based format evaluation deferred to Phase 2 when `wiki_log` chip-click data 
 
 ---
 
+## DR-8: Audio Output & Presentation Templates Research (2026-04-13)
+
+### Podcastfy — Analysis and Rejection as Dependency
+
+**Repo:** github.com/souzatharsis/podcastfy — Apache 2.0, pip installable.
+**Latest version:** 0.4.1 (Dec 2025). Active but slowing — burst in Oct-Nov 2024.
+
+**Architecture (2 steps):**
+1. Transcript generation — any LLM (OpenAI, Anthropic, Google, local via Ollama)
+2. TTS synthesis — OpenAI, Google, ElevenLabs, Microsoft Edge TTS
+
+**Why rejected as a library dependency:**
+- Optimized for dialogue (2-speaker), not monologue summary — single-speaker is secondary
+- Single primary maintainer = abandonment risk for a production dependency
+- Author admits OpenAI TTS output "does not sound that exceptionally great"
+- ElevenLabs required for quality improvement — rejected on cost grounds
+- Compilore already owns ingest + synthesis pipeline; Podcastfy duplicates it
+- Adding Podcastfy = 100-150 lines of wrapper around what we can do in 100-150 lines natively
+
+**Decision: build `audio_summary.py` natively → D-50**
+
+### Audio Summary Implementation Plan
+
+```python
+# audio_summary.py — ~120 lines, no new dependencies
+# Input: synthesizer output (already exists in query_graph.py)
+# Step 1: Sonnet prompt → spoken-word transcript (no bullet points, no headers,
+#         natural connective tissue between ideas, Polish or EN)
+# Step 2: openai.audio.speech.create(model="tts-1", voice="onyx", input=transcript)
+# Output: MP3 file + playback URL in QueryResponseCard
+```
+
+**Cost model:**
+- Transcript generation (Sonnet): ~$0.01 per summary (same as query synthesis)
+- TTS (OpenAI tts-1 standard): $15/1M chars ≈ $0.15 per 10K-char summary
+- Monthly estimate at 50 summaries: ~$8 total
+- TTS HD ($30/1M): double cost, marginal quality gain for briefings — use standard
+
+**TTS provider comparison (single-speaker, Polish support):**
+| Provider | Cost/1M chars | Polish quality | Notes |
+|---|---|---|---|
+| OpenAI tts-1 | $15 | Good | Recommended |
+| OpenAI tts-1-hd | $30 | Good | Overkill for briefings |
+| Google Neural | ~$16 | Good | Comparable, more setup |
+| Microsoft Edge TTS | Free (unofficial API) | Mediocre on PL | No SLA, brittle |
+| ElevenLabs | ~$180 | Excellent | Rejected — cost |
+
+### Presentation Templates — McKinsey vs Accenture Design Philosophy
+
+**McKinsey style:**
+- Pyramid Principle: conclusion first, evidence below
+- Action titles: full sentence stating the insight (not "Market Analysis" but "Market shrinks 12% YoY — repositioning required")
+- One claim per slide, MECE structure
+- Colors: white + navy blue, sparse accent
+- Fonts: Georgia (headlines) + Arial (body)
+- Data-heavy, chart-forward
+
+**Accenture style:**
+- Dark background (deep navy / near-black)
+- Large iconography, more whitespace, infographic aesthetic
+- "Insight box" — single highlighted takeaway in bottom-right corner
+- Brand accent: purple (#A100FF), not blue
+- More visual, less text-dense than McKinsey
+
+**Six-template system for Compilore `/deck` → D-51:**
+
+| Template ID | Use case | Core structure |
+|---|---|---|
+| `executive_brief` | Board / fast decision | SCQA + 1 recommendation slide |
+| `data_story` | Results presentation, analysis | Context → Trend → Implication → So What |
+| `status_update` | Project update | Status → Risks → Next Steps (RAG indicator) |
+| `comparison` | Options / vendor selection | 2-3 column comparison → recommendation |
+| `process_flow` | How something works | Swimlane or numbered step-by-step |
+| `executive_summary` | Report distillation | 3-5 bullets + key metric + So What |
+
+**LLM template selection:** intent parser detects query type → selects template → passes to Marp prompt. User can override via chip ("change to data_story"). Zero extra LLM call for selection (rule-based, same as format_evaluator.py pattern).
+
+### Open Research Questions (Updated)
+
+8. **Marp multi-template implementation:** How to cleanly implement 6 Marp templates as prompt variants? Single `format_deck.md` with conditional sections vs 6 separate prompt files?
+
+9. **OpenAI TTS Polish quality in practice:** Does `tts-1` handle Polish diacritics correctly? Does it produce natural prosody for Polish regulatory terminology (MPZP, WZ, OUZ)?
+
+---
+
 ## DR-6: Analiza Biznesowa GIS Engine — Dane Rynkowe (2026-04-12)
 
 ### Dane finansowe konkurencji (KRS)
@@ -567,3 +652,76 @@ Każdy wynik systemu musi zawierać:
 5. AI Act art. 50 compliance jeśli LLM interfejs
 
 **Szacowany koszt:** 3,000–8,000 PLN jednorazowo.
+
+---
+
+## DR-8: B2B Technical Distribution in Poland — Market Analysis (2026-04-16)
+
+**Source:** External deep research report — "The Information Retrieval Burden and AI Adoption Gaps in Traditional Polish B2B Sectors"
+
+### Core Finding
+
+The information retrieval burden in Polish B2B distribution is structurally identical to the parametric PDF search problem Compilore solves. This is external validation of the core architecture, not just market research.
+
+**Four pillars (from report) = Compilore's four design constraints:**
+1. Large unstructured PDF corpus → Ingest + Docling
+2. Parametric search need → hybrid search (pgvector + BM25)
+3. Client-facing answer requirement → Query loop with citations
+4. Safety and accuracy criticality → Gatekeeper + citation-hard requirement
+
+### Quantified Pain (per vertical)
+
+| Vertical | Time lost/week | Primary barrier to AI adoption |
+|---|---|---|
+| HVAC & Construction Supply | 10–15h/advisor | Liability fear, tables as raster images in PDFs |
+| Electrical & Industrial Automation | 12–15h/engineer | Zero tolerance for hallucination, exact values required |
+| Medical Devices | 15–20h/specialist | Regulatory auditing, data privacy mandates |
+| Chemical & Food Ingredients | 16–18h/specialist | Chemical nomenclature complexity, REACH compliance |
+| Automotive Spare Parts | 10–12h/advisor | Fragmented legacy data, visual exploded diagrams |
+
+### Polish Market Specifics
+
+- 49.15% of Polish enterprises use AI in some capacity — but skewed to marketing/HR in large firms
+- Active AI adoption in construction/real estate: ~30%, mostly for basic data collection
+- Primary adoption barriers: insufficient overview of suitable tools (26%), lack of training (18%), lack of trust (17%)
+- Only 6% claim they don't understand AI — the problem is tool fit, not comprehension
+- 60% of professionals in related sectors want to learn AI for their work — demand exists
+- 85% of firms willing to pay 28% salary premium for AI-proficient candidates — budget exists, misdirected
+
+### Pricing Validation
+
+- Technical advisor salary: ~€2,950/msc gross (~€18.50–23/hr)
+- 35% of time wasted = ~56h/msc = €1,000+/msc/employee drain
+- AI tool at €100–250/user/msc = 4–10x ROI → justified
+- WMS/ERP benchmark: $100–500/user/msc — Compilore fits inside existing software budget mental model
+- Trial requirement: short freemium (7–14 days) critical to overcome trust deficit in B2B
+
+### Sales & Buying Psychology
+
+- SME (10–49 employees): budget holder = owner/founder. Avoid "AI/LLM/GenAI" language entirely. Use: "automated catalog search", "reduce RFQ turnaround", "eliminate engineering bottlenecks".
+- Mid-market (50–250 employees): champion = Head of Presales / Sales Director. Economic buyer = CFO or IT Director. Integration with Comarch/Asseco is a procurement question.
+- Key trust mechanism: live demo using the prospect's own PDFs. Immediate, visceral proof.
+
+### GTM Channels Confirmed
+
+- **Trade shows:** Ptak Warsaw Expo (153K sqm, 120+ fairs/year), Warsaw HVAC Expo (60K visitors, February), Industrial Automation Fair (13K visitors, May, Ptak Warsaw Expo)
+- **Trade press:** Rynek Instalacyjny (HVAC), Energia Elektryczna (electrical), MM Magazyn Przemysłowy (broad industrial)
+- **Associations:** POLMED (medical devices, €2.3B exports), Eurovent (HVAC specs), KIG (general trade)
+- **Digital:** Technical SEO on Polish parametric queries, LinkedIn targeting Dyrektor ds. Technicznych / Kierownik Działu Ofertowania
+
+### Structural Similarity Signal
+
+All five verticals share identical workflow architecture → same Compilore engine, different adapters. Engineering investment for one vertical maps to all others with adapter-only changes. This is confirmation of the Adapter Pattern as the correct architectural choice.
+
+### Pending Research (Scheduled)
+
+- **DR-9:** Polish B2B distribution buyer journey & procurement mechanics — who signs PO, typical cycle length, Comarch integration feasibility
+- **DR-10:** Competitive landscape — what catalog search tools exist in HVAC/electrical, why they fail, what Akeneo/Salsify/Syndigo offer vs what's missing
+
+### Implications for Architecture
+
+- `organization_id` hard isolation is now a Phase 2 prerequisite, not a nice-to-have (see D-73)
+- Multi-language corpus (PL/EN/DE manufacturer catalogs) must be tested with Wojtek pilot
+- Bulk upload flow needed — low-tech users will not self-onboard 300 PDFs via drag-and-drop
+- Citation requirement (D-72) upgrades from "strong preference" to "hard requirement, no display without citation"
+- VLM fallback priority increases: engineering tables in PDFs are frequently raster images (confirmed by report)

@@ -1,7 +1,7 @@
 # 01 — PRODUCT
 ## Compilore: Agentic Knowledge Compiler
 
-**Last updated:** 2026-04-11
+**Last updated:** 2026-04-17
 **Status:** Phase 1 — Personal Playground (live, running locally)
 
 ---
@@ -215,3 +215,10 @@ Status: planned Sprint 4
 Gated execution: EXPLAIN → PLAN → IMPLEMENT.
 For compliance-sensitive document analysis (MPZP parameters, permit requirements).
 Status: Phase 2
+
+### Proposal Generation — /generate/proposal (Phase 2, high priority)
+Generates a client proposal using Wiki context: previous proposals as format anchors,
+client data, and sprint/pricing history. Saved to `wiki/outputs/proposals/` with git commit.
+Status: Phase 2 high priority for B2B sales segment
+
+Decision traceability: Phase 2 org/dept execution and i18n baseline dependencies are recorded in `D-59` and `D-60` (`docs/04_DECISIONS.md`).

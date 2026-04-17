@@ -1,7 +1,7 @@
 # 02 — STRATEGY
 ## Compilore: Market, GTM, Pricing, Risks
 
-**Last updated:** 2026-04-12
+**Last updated:** 2026-04-17
 
 ---
 
@@ -23,107 +23,140 @@
 
 ## Target Market (Phase 2)
 
-### GIS Spatial Engine — Segmenty (priorytet)
+### PIVOT DECISION (2026-04-16): B2B Technical Distribution — PRIMARY beachhead
 
-**Segment 1 — Deweloperzy MŚP (PRIMARY, pierwsze 12 msc):**
+Previous beachhead (architectural firms / MPZP) is SUPERSEDED. See D-70 in 04_DECISIONS.md.
 
-- **Definicja:** firmy realizujące 5–50 projektów/rok, budżety 10–200M PLN
-- **Liczba:** kilkaset do 2,000+ aktywnych podmiotów w Polsce
-- **Decision maker:** właściciel lub Land Acquisition Manager
-- **Cykl sprzedaży:** 1–3 tygodnie po demo
-- **ARPU:** 2,000–4,000 PLN/msc
-- **Pain:** ryzyko zakupu działki wyrzuconej poza OUZ, opóźnienia 7–21 dni przy manualnej analizie, koszt 30,000–200,000 PLN due diligence per zakup gruntu
-- **Pitch:** „Tarcza chroniąca 10M PLN przed błędnym zakupem”
+**New beachhead:** Polish B2B technical distribution companies — HVAC, electrical wholesale, industrial automation, medical devices, chemical/food ingredients, automotive spare parts.
 
-**Segment 2 — Fundusze PE / Family Offices (SECONDARY, 6–18 msc):**
+**Why pivot:**
+- Architects = vitamin (convenience). Distribution advisors = painkiller (10–20h/week lost per person, €1,000+/msc/employee cost).
+- No existing relationships or distribution built for architect market — zero switching cost.
+- B2B distribution has clear, quantified ROI: 35% of technical advisor time wasted on manual PDF search.
+- Higher defensible ARPU: €100–250/user/msc (vs 200–600 PLN for architects).
+- Wojtek (pilot user, technical advisor) = direct line to first paying corporate client.
 
-- **Definicja:** portfele 50–500+ działek, zarządzane przez fundusze
-- **Liczba:** 2,112 fundacji rodzinnych + 34 fundusze VC/PE (Q1 2025)
-- **Decision maker:** zarząd/rada nadzorcza (długi procurement)
-- **Cykl sprzedaży:** 3–6 miesięcy
-- **ARPU:** 6,000–10,000 PLN/msc (Conflict Alert jako główny feature)
-- **Pain:** portfel land-bankowy narażony na systemowe ryzyko POG, niemożność monitorowania 2,479 gmin manualnie
-- **Pitch:** „Radar portfela — alarmuje gdy POG deprecjonuje Twój bank ziemi”
+**Pilot user:** Wojtek — technical advisor, already onboarding. Will upload full working folder set over 1–2 months. First signal: does Compilore answer parametric technical questions from manufacturer PDFs with correct citations?
 
-**Segment 3 — Rzeczoznawcy majątkowi (TERTIARY, model transakcyjny):**
+**Conversion path:** Wojtek (free pilot) → internal champion → company buys Team/Company tier → adjacent companies in same vertical.
 
-- **Definicja:** 7,591 certyfikowanych rzeczoznawców
-- **Model:** Pay-Per-Report (nie subskrypcja), 1 credit = 1 operat
-- **ARPU:** 500–1,500 PLN/msc lub per-query
-- **Pain:** weryfikacja planistyczna w każdym operacie szacunkowym, chaos w „interregnum” POG vs stare MPZP
+---
 
-**Compilore (architekci / PKB tekstowy)** pozostaje produktem równoległym (vitamin / edukacja rynku); GIS Engine jest **painkillerem** priorytetowym według DR-7 i D-45.
+### Segment Map (B2B Distribution)
+
+| Segment | Key Role | Time Lost/Week | Estimated ARPU | Priority |
+|---|---|---|---|---|
+| HVAC & Construction Supply | Technical Sales Advisor, Presales Engineer | 10–15h | 600–1,500 PLN/msc | **PRIMARY** |
+| Electrical & Industrial Automation | Systems Integrator, Presales Support | 12–15h | 600–1,500 PLN/msc | **PRIMARY** |
+| Medical Devices | Field Technical Specialist, Regulatory Affairs | 15–20h | 1,200–2,500 PLN/msc | Secondary |
+| Chemical & Food Ingredients | Product Specialist, Formulation Advisor | 16–18h | 1,200–2,500 PLN/msc | Secondary |
+| Automotive Spare Parts | Parts Advisor, Technical Counterperson | 10–12h | 400–800 PLN/msc | Tertiary |
+
+**HVAC + Electrical = first two verticals.** Identical document structure (parametric PDFs, engineering tables, multi-language catalogs). Wojtek's vertical is the entry point.
 
 ---
 
 ## Distribution (Phase 2)
 
-### Primary — biura rachunkowe (accounting firms)
-Leveraging GapRoll network of accounting firms as referral partners.
-- Revenue share: 20% recurring
-- Pitch to accountant: "healthy client stays longer"
-- Pre-existing trust relationship with target firm
+### GTM reality for Polish B2B distribution sector
 
-### Secondary — direct to architects
-- LinkedIn "Build in Public" content (dual-use: GapRoll PH + Compilore validation)
-- Hyper-personalized Loom demos: record Compilore parsing a real MPZP from the
-  prospect's municipality. 3 demos, measure response rate before scaling.
-- IARP (Izba Architektów RP) — potential partnership / endorsement channel
-- Instantly.ai for outreach sequences (already in GapRoll stack)
+This market does NOT respond to LinkedIn-first, build-in-public, or standard SaaS marketing. Trust is built physically and through industry-specific channels.
 
-### Validation first (before any outreach at scale):
-1. 15 interviews with architects; 7/10 must cite MPZP chaos as burning pain
-2. Landing page: architects upload real MPZP to join waitlist. Target: 5-10 docs
-3. Pre-sale: 2 Letters of Intent for paid pilot (~$250 archive compilation)
-4. 1 public case study with the hardest MPZP in Poland — posted publicly, stronger
-   signal than private uploads
+### Channel 1 — Champion-led (primary, first 12 months)
+- Wojtek = pilot champion → introduces to company decision-maker (owner or head of presales/engineering)
+- Pattern: 1 engaged user per firm → internal demo → company purchase
+- Replicate: identify 3–5 firms in same vertical as Wojtek through him directly
+
+### Channel 2 — Trade shows (HVAC + Electrical verticals)
+- Warsaw HVAC Expo (February, annual) — 60,000 visitors, 450 exhibitors, exact target buyer
+- International Trade Fair for Industrial Automation (May, Ptak Warsaw Expo) — 13,000+ visitors, 200+ exhibitors
+- Positioning: NOT "AI startup". Exhibit as "technical catalog search tool". Demo live on the floor using PDFs from exhibitors at the same event.
+
+### Channel 3 — Trade press
+- Rynek Instalacyjny — dominant HVAC monthly, digital portal
+- Energia Elektryczna / Portal Elektryka — electrical wholesale community
+- MM Magazyn Przemysłowy — broad industrial B2B management
+- Format: case study ("How [firm] reduced RFQ turnaround by 50%"), NOT product announcement
+
+### Channel 4 — Trade associations
+- POLMED (medical devices) — largest distributor chamber, €2.3B export footprint
+- Eurovent (HVAC standards body) — dictates specs Polish advisors search for daily
+- KIG (National Chamber of Commerce) — broad B2B
+
+### What NOT to do (yet)
+- No LinkedIn "build in public" for this vertical — wrong audience
+- No cold email blasts — trust deficit is real (17% cite distrust as primary barrier)
+- No "AI" or "LLM" in any marketing copy — use: "automated catalog search", "instant technical answer with source citation", "eliminate RFQ bottlenecks"
 
 ---
 
 ## Pricing (Phase 2)
 
-**Model:** Usage-based, NOT flat-rate. API costs are variable; flat-rate = bankruptcy.
-**Value metric:** Documents processed + Wiki size. NOT per-seat.
-
-| Tier | Price | Includes |
-|---|---|---|
-| Starter | ~200 PLN/mo | 20 docs/mo, 200 queries, no Lint |
-| Professional | ~600 PLN/mo | 100 docs/mo, unlimited queries, weekly Lint |
-| Enterprise | Custom 2,500+ PLN/mo | Unlimited, daily Lint, API |
-
+**Model:** Team-tier flat fee (NOT per-seat, NOT usage-only flat-rate).
+**Rationale:** Per-seat in SME triggers sticker shock. Flat team fee anchors on headcount, not individual. Usage-based component only kicks in above tier limits.
+**Value metric:** Documents processed + Wiki size per organization.
 **Payment stack:** Fakturownia + Przelewy24. Stripe is BANNED — no JPK_FA support.
-Polish B2B strongly prefers bank transfer / BLIK over card.
+
+| Tier | Price | Users | Docs/msc | Queries | Notes |
+|---|---|---|---|---|---|
+| **Solo** | 300–400 PLN/msc | 1 | 50 | 500 | Freelancer / independent advisor |
+| **Team** | 1,200–1,800 PLN/msc | 2–10 | 300 | Unlimited | Shared org Wiki, 1 admin panel |
+| **Company** | 3,500–5,000 PLN/msc | 10–50 | Unlimited | Unlimited | API access, dedicated onboarding |
+| **Enterprise** | Custom 8,000+ PLN/msc | 50+ | Unlimited | Unlimited | On-premises option, SLA |
+
+**ROI framing for sales:** Technical advisor costs ~€2,950/msc gross. 35% of time wasted = €1,000+/msc drain per person. Team tier at 1,500 PLN/msc for 5 advisors = 5x ROI minimum. Pitch: cost of the tool < cost of one hour of the problem per week.
+
+**Trial:** 14-day free trial per organization (not per user). Pilot users (like Wojtek) = extended manual pilot tracked separately.
 
 ---
 
 ## Competitive Positioning
 
-**Frame:** "Geoportal gives you the raw map. Compilore gives you the legal analysis layer on top."
-Geoportal-krajowy.pl is the #1 tool for architects in Poland. Compilore positions as
-the intelligence layer above raw regulatory data, not a replacement.
+**Frame:** "Your technical advisors spend 35% of their time being a human search engine. Compilore eliminates that."
 
-**Moat:** Compiled proprietary knowledge base. The longer a firm uses Compilore, the
-more their specific Wiki compounds and diverges from generic tools. Data lock-in is
-a feature, not a bug — framed as "your firm's institutional memory."
+**Not competing with:** ERP systems (Comarch, Asseco) — we integrate alongside them, not replace them. Buyer anchors our price against ERP/WMS cost (~$100–500/user/msc) — we fit inside that range.
 
-**Future moat (Phase 3, not now):** Optional anonymized public pool for public MPZP
-documents. Public MPZPs are public domain (RODO does not restrict). Aggregate compiled
-knowledge across clients = network effect. Noted, not implemented.
+**Competing against:** Excel spreadsheets, CTRL+F in PDFs, phone calls to manufacturer reps, human memory and experience.
+
+**Moat:** Compiled organizational Wiki. After 3 months of use, a firm has a proprietary, structured knowledge base of every manufacturer catalog they work with. New employee onboarding = query the Wiki instead of sitting next to a senior advisor for a year. Churn = losing that institutional memory. Data lock-in is a feature, framed as "your firm's technical memory."
+
+**Trust mechanism:** Every answer must include exact source citation (document name + page number). No citation = answer not shown. This is non-negotiable in this sector — one wrong recommendation = structural failure, chemical hazard, or MDR violation. Citation trail is the product, not a UX nicety.
 
 ---
 
 ## Adjacent Verticals (Phase 3+)
 
-The Adapter Pattern in architecture means new industries require only new adapters,
-not core engine changes:
+B2B technical distribution verticals share identical document structure — new vertical = new adapter, not new core engine.
 
-| Vertical | Adapter needed | Existing signal |
+| Vertical | Adapter needed | Entry signal | ARPU potential |
+|---|---|---|---|
+| Medical devices | `adapters/medical_device/` | POLMED association | High (regulatory complexity) |
+| Chemical / food ingredients | `adapters/chemical/` | — | High (REACH/ECHA compliance) |
+| Automotive spare parts | `adapters/automotive/` | — | Medium (thin margins) |
+| Tax advisory (biura rachunkowe) | `adapters/tax_law/` | GapRoll distribution channel | Medium |
+| Legal firms | `adapters/legal/` | Similar document structure | Medium |
+| Environmental consultants | `adapters/environmental/` | — | Low/medium |
+
+HVAC + Electrical are Phase 2 beachhead. Medical + Chemical are Phase 3 (higher regulatory complexity, longer sales cycle, higher ARPU).
+
+**Pending Deep Research (scheduled):**
+- DR-8: B2B distribution SaaS pricing & team model mechanics
+- DR-9: Polish B2B distribution buyer journey & procurement (who signs PO, how long)
+- DR-10: Competitive landscape — catalog search tools in HVAC/electrical distribution
+
+---
+
+## Team Model — Open Architecture Questions
+
+These must be resolved before first corporate client onboarding:
+
+| Question | Impact | Status |
 |---|---|---|
-| Tax advisory firms (biura rachunkowe) | `adapters/tax_law/` | GapRoll distribution channel |
-| Legal firms | `adapters/legal/` | Similar document structure to MPZP |
-| Environmental consultants | `adapters/environmental/` | — |
-
-Tax advisory is highest-priority Phase 3 target — distribution channel already exists.
+| `organization_id` as hard DB boundary | Data isolation between firms — CRITICAL | 🔲 Not yet implemented |
+| Admin panel for org manager | User management, upload oversight, billing view | 🔲 Deferred to Phase 2 |
+| Data ownership on employee exit | Wiki stays with org, not user — must be in ToS | 🔲 Legal / ToS |
+| Multi-language corpus (PL/EN/DE catalogs) | Mixed language in single org Wiki | 🔲 Test with Wojtek |
+| Bulk upload + concierge onboarding | Low-tech users won't self-onboard 300 PDFs via drag-and-drop | 🔲 Phase 2 consideration |
 
 ---
 
@@ -153,7 +186,7 @@ Tax advisory is highest-priority Phase 3 target — distribution channel already
 ## GapRoll Synergies
 
 | GapRoll Asset | Compilore Use |
-|---|---|
+|---|---|---|
 | Hetzner VPS + Coolify | Shared hosting infrastructure |
 | n8n VPS (37.27.14.41) | Workflow orchestration for all loops |
 | Viktor.ai (Slack) | Phase 1 interface |

@@ -1,14 +1,14 @@
 # 07 — SPRINTS
 ## Compilore: Sprint Plan, Status, Backlog
 
-**Last updated:** 2026-04-11
+**Last updated:** 2026-04-17
 
 ---
 
 ## Current Status Summary
 
 **Phase:** 1 — Personal Playground
-**Sprint:** Sprint 4b complete (Wiki Tree + format rendering). Next: Auth (unblock Wiki Tree) → Sprint 3 (Lint) → Hetzner deploy
+**Sprint:** Sprint 3 (Lint) + Sprint 4b (Wiki Tree) complete; **Auth shipped 2026-04-12** (magic link + JWT tenant). Next: Hetzner deploy + beta hardening
 **Running:** Locally on MacBook Pro 14" M4 Pro (24GB), localhost:8001
 **Repo:** github.com/glovvva/compilore (private)
 **Supabase:** EU West (Paris), schema deployed, tenant "bartek-playground" active (id: a6d3721a…)
@@ -29,7 +29,9 @@
 
 ### Known Issues / Debt
 - **Backlog:** test: middleware processing_time_ms injection (FastAPI JSON envelope)
-- Auth not implemented in web UI yet — Wiki Tree shows empty (RLS blocks unauthenticated requests)
+- [x] **Resolved (2026-04-12):** Backend + static playground auth — Supabase magic link, `Authorization: Bearer` on protected API routes, dynamic Supabase config in `serve_ui`
+- `/lint/decay` uses `COMPILORE_DEFAULT_TENANT_ID` (hardcoded tenant) — acceptable for n8n webhook; revisit in Phase 2
+- HTTPS not yet configured on production URL (sslip.io shows „Niezabezpieczona”)
 - [x] **Resolved:** `psycopg2-binary` — present in `requirements.txt` and dev venv (earlier debt item was stale)
 - LangSmith monitoring not connected
 - Model name `claude-3-5-haiku-20241022` in some places — update to `claude-haiku-4-5-20251001`
@@ -117,6 +119,13 @@
 - [x] Weekly cost report → Slack/UI notification (operator/n8n wiring — not hard-coded in repo)
 - [x] **Test:** Run lint on Wiki with intentionally broken links + stale pages (manual / API)
 
+**Auth (shipped 2026-04-12, ties lint + API to real tenants):**
+- [x] Supabase Auth magic link
+- [x] JWT → `tenant_id` dependency (`src/lib/auth.py`)
+- [x] All endpoints use `Depends(get_current_tenant_id)`
+- [x] Frontend auth headers (`_authHeaders()` on playground fetches)
+- [x] Dynamic `SUPABASE_URL` / `SUPABASE_ANON_KEY` injection (`serve_ui` replaces `%%…%%` placeholders)
+
 **Implementation notes:**
 - `POST /lint/resolve` expects `thread_id` (from paused run) + `decisions` dict with keys as `slug_a__slug_b`
 - `POST /lint/decay` requires `LINT_DECAY_WEBHOOK_SECRET` env var + `X-Lint-Decay-Token` header
@@ -152,7 +161,7 @@
   - Source chips as inline badge components
   - Confidence delta display ("↑ 0.70→0.85") not raw confidence score
   - Progressive disclosure: secondary context collapsed by default
-- [ ] Save-to-Wiki button server-side handler — currently UI stub only; gatekeeper auto-save unchanged; needs `POST /query/save` endpoint before beta deploy
+- [x] Save-to-Wiki button server-side handler — POST /query/save implemented (2026-04-16)
 - [x] Intent parser (`intent_parser.py`) — detect output format from natural language ("mindmap", "porównaj", "tabela", "mapa myśli", "/graph", etc.); strips directive before synthesis
 - [x] `format_evaluator.py` — rule-based heuristics: evaluates answer metadata (entity count, page_types, step patterns) → returns suggested_formats[] JSON
 - [x] Format suggestion chips in response card UI — 1-2 chips when evaluator confidence > threshold; `POST /query/format` + tooltips
@@ -212,8 +221,8 @@
 - [x] components/response-card.tsx — format router, FORMAT_DISPLAY_LABELS badge
 - [x] app/globals.css — animate-slide-in keyframe
 
-**Blocked by:** Supabase Auth in web UI (Wiki Tree returns empty without session)
-**Next:** Add login page → create user in Supabase dashboard → test live Wiki Tree
+**Blocked by:** ~~Supabase Auth in web UI~~ — **unblocked 2026-04-12** (Next.js app still uses own Supabase SSR; FastAPI playground + backend JWT live)
+**Next:** Ensure Next.js workspace sends `Authorization` to `localhost:8001` where applicable; beta onboarding doc
 
 ---
 
@@ -297,6 +306,8 @@ Items that are defined but not yet assigned to a sprint:
 | Docling PDF parser | Phase 2 | MPZP processing |
 | Kreuzberg async PDF | Phase 2 | Replace PyMuPDF |
 | PII stripping middleware | Phase 2 | spaCy NER + RegEx |
+| Technical Advisor query flow wiring | ICP — Technical Advisor | ✅ done 2026-04-16. Feature flag: TECHNICAL_ADVISOR_MODE=true in .env. Default off. Core query_graph.py untouched. |
+| Technical Advisor Docling table extraction | ICP — Technical Advisor / Phase 2 | Replace PyMuPDF for manufacturer catalogs. TableFormer ACCURATE mode. See adapters/technical_advisor/README.md |
 | PreResponseChecklist in gatekeeper | Quality | Self-verification loop after evaluation: gatekeeper checks own reasoning vs N×N×G criteria. ~14pp quality improvement per GapRoll harness research. TODO already in `gatekeeper.py` docstring. |
 | VLM fallback (GPT-4o Vision) | Phase 2 | Scanned pages/maps |
 | plan_ogolny_adapter.py | Phase 2 | Distinct from MPZP (reform 2026) |
@@ -304,3 +315,8 @@ Items that are defined but not yet assigned to a sprint:
 | DPA/DPIA/Regulamin | Phase 2 legal | Before first paying client |
 | OC insurance | Phase 2 legal | 1-3M PLN |
 | ZDR application to OpenAI | Phase 2 legal | Start early |
+| `POST /generate/proposal` endpoint | Output / Sales | Generate client proposal using Wiki context (previous proposals as format anchors + client data + sprint/pricing history). Priority: HIGH for sales team pilot segment. |
+| `generate_proposal.md` prompt | Prompts | New dedicated prompt at `src/config/prompts/generate_proposal.md` |
+| Proposal output persistence | Output / Wiki | Save to `wiki/outputs/proposals/` with atomic git commit |
+
+Decision traceability: Department isolation and i18n foundations for Phase 2 implementation are tracked as `D-59` and `D-60` in `docs/04_DECISIONS.md`.

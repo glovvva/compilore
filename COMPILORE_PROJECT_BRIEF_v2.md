@@ -2,7 +2,7 @@
 ## Agentic Knowledge Compiler | Personal Playground → B2B SaaS
 
 **Created:** 2026-04-09
-**Updated:** 2026-04-09 (post Deep Research: legal, VLM feasibility, scaling, Docling)
+**Updated:** 2026-04-17 (multi-tenant auth, Technical Advisor ICP, department isolation, i18n foundations, beachhead pivot, decision-log cleanup)
 **Author:** Bartek (Founder)
 **Status:** Pre-development — Sprint 0
 
@@ -202,8 +202,22 @@ CREATE TABLE tenants (
 CREATE TABLE user_profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id),
   tenant_id UUID REFERENCES tenants(id) NOT NULL,
+  department_id UUID REFERENCES departments(id),
+  locale TEXT NOT NULL DEFAULT 'pl',
   role TEXT DEFAULT 'user',
   created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Departments (tenant -> department -> user -> wiki_pages)
+CREATE TABLE departments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  slug TEXT NOT NULL,
+  visibility TEXT NOT NULL DEFAULT 'private'
+    CHECK (visibility IN ('private', 'tenant_wide')),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(tenant_id, slug)
 );
 
 -- Raw documents
@@ -224,6 +238,7 @@ CREATE TABLE documents (
 CREATE TABLE wiki_pages (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id UUID REFERENCES tenants(id) NOT NULL,
+  department_id UUID REFERENCES departments(id),
   slug TEXT NOT NULL,
   title TEXT NOT NULL,
   page_type TEXT NOT NULL,       -- concept, entity, source_summary, output, index
@@ -238,6 +253,7 @@ CREATE TABLE wiki_pages (
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(tenant_id, slug)
 );
+-- department_id NULL = tenant-wide visibility; non-NULL = department-scoped visibility
 
 -- Document chunks (for vector + full-text search)
 CREATE TABLE document_chunks (
@@ -293,7 +309,8 @@ CREATE OR REPLACE FUNCTION hybrid_search(
   query_text TEXT,
   query_embedding vector(1536),
   match_count INT DEFAULT 10,
-  rrf_k INT DEFAULT 60
+  rrf_k INT DEFAULT 60,
+  scope TEXT DEFAULT 'tenant' -- 'department' | 'tenant' | 'global'
 )
 RETURNS TABLE (
   chunk_id UUID,
@@ -333,6 +350,30 @@ AS $$
   FROM combined ORDER BY score DESC LIMIT match_count;
 $$;
 ```
+
+RLS model for department isolation (Option B):
+- Default open within tenant.
+- Department-scoped rows are visible only to members of that department.
+- No hard departmental silos and no per-page ACL in Phase 2.
+
+### 4.4 Agent-Ready Requirements
+
+- OpenAPI schema includes semantic endpoint descriptions (intent, side effects, and expected follow-up actions), not just request/response typing.
+- `X-Agent-ID` header is captured in middleware to identify calling agent vs human UI.
+- Long-running operations (compile, lint) support async webhook mode: immediate `job_id`, result posted to `callback_url`.
+- Every JSON response includes `available_actions[]` to guide next orchestration step.
+
+### 4.5 i18n Foundations (Phase 1 infrastructure only)
+
+- `user_profiles.locale` field defaults to `'pl'`.
+- All user-facing strings are externalized into `src/config/i18n/pl.json`; no hardcoded Polish strings in business logic.
+- API accepts `Accept-Language` and passes locale to synthesis prompts.
+- Response language follows user locale, not system default.
+- Polish legal terms (MPZP, OUZ, etc.) remain untranslated proper nouns.
+
+Decision traceability:
+- Department isolation model = `D-59` in `docs/04_DECISIONS.md`.
+- i18n infrastructure-first approach = `D-60` in `docs/04_DECISIONS.md`.
 
 ### 4.4 Wiki Page Format
 

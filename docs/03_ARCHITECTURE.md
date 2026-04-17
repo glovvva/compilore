@@ -1,7 +1,7 @@
 # 03 — ARCHITECTURE
 ## Compilore: Stack, Schema, Module Map
 
-**Last updated:** 2026-04-10
+**Last updated:** 2026-04-17
 
 ---
 
@@ -34,6 +34,10 @@ API Design Rules (from GapRoll cross-project reference)
 
 - Every JSON endpoint returns `APIResponse[T]` with `meta` (`request_id`, `timestamp`, `processing_time_ms`) and optional `ai_context` (`ai_generated`, `model_used`, `cost_usd`).
 - `processing_time_ms` is injected automatically by HTTP middleware — never manually per route.
+- Include semantic endpoint descriptions in OpenAPI (operation intent, side effects, and expected next action), not just type schemas.
+- Include `X-Agent-ID` request header handling in middleware to distinguish agent callers from human UI calls.
+- Long-running operations (compile, lint) should support async webhook flow: immediate `job_id` + callback to `callback_url` when complete.
+- All JSON responses include `available_actions[]` for progressive agent orchestration.
 - **Endpoint naming:** `POST /api/v1/{domain}/{action}`
   - `domain` = noun: `wiki`, `ingest`, `lint`
   - `action` = verb: `compile`, `query`, `ingest`, `run`, `stats`
@@ -220,8 +224,24 @@ CREATE TABLE tenants (
 CREATE TABLE user_profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id),
   tenant_id UUID REFERENCES tenants(id) NOT NULL,
+  department_id UUID REFERENCES departments(id),
+  locale TEXT NOT NULL DEFAULT 'pl',
   role TEXT DEFAULT 'user',
   created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+**departments** — tenant-level knowledge boundary layer
+```sql
+CREATE TABLE departments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  slug TEXT NOT NULL,
+  visibility TEXT NOT NULL DEFAULT 'private'
+    CHECK (visibility IN ('private', 'tenant_wide')),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(tenant_id, slug)
 );
 ```
 
@@ -246,6 +266,7 @@ CREATE TABLE documents (
 CREATE TABLE wiki_pages (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id UUID REFERENCES tenants(id) NOT NULL,
+  department_id UUID REFERENCES departments(id),
   slug TEXT NOT NULL,
   title TEXT NOT NULL,
   page_type TEXT NOT NULL,             -- concept | entity | source_summary | output | index
@@ -259,6 +280,7 @@ CREATE TABLE wiki_pages (
   UNIQUE(tenant_id, slug)
 );
 ```
+`department_id = NULL` means tenant-wide visibility. Non-NULL means department-scoped visibility.
 
 **document_chunks** — for vector + full-text search
 ```sql
@@ -311,6 +333,10 @@ CREATE POLICY "tenant_isolation" ON documents FOR ALL
   USING (tenant_id = (SELECT tenant_id FROM user_profiles WHERE id = auth.uid()));
 -- Same pattern for all tables
 ```
+Option B policy model for knowledge visibility:
+- Default open within tenant (`department_id IS NULL` rows visible to all members of the tenant).
+- Department-scoped pages (`department_id IS NOT NULL`) visible only to users who belong to that department.
+- No hard tenant-internal silos and no per-page ACL at this phase.
 
 ### Hybrid Search Function (RRF)
 ```sql
@@ -318,7 +344,8 @@ CREATE OR REPLACE FUNCTION hybrid_search(
   query_text TEXT,
   query_embedding vector(1536),
   match_count INT DEFAULT 10,
-  rrf_k INT DEFAULT 60
+  rrf_k INT DEFAULT 60,
+  scope TEXT DEFAULT 'tenant'  -- 'department' | 'tenant' | 'global'
 )
 RETURNS TABLE (chunk_id UUID, wiki_page_id UUID, chunk_text TEXT, rrf_score FLOAT)
 LANGUAGE sql STABLE SECURITY DEFINER
@@ -353,6 +380,10 @@ AS $$
   FROM combined ORDER BY score DESC LIMIT match_count;
 $$;
 ```
+Scope semantics:
+- `department`: search only department-scoped rows for caller's department (plus tenant-wide rows if desired by query module policy).
+- `tenant`: search all tenant-visible rows (default).
+- `global`: reserved for cross-tenant/public corpus (Phase 3+; not active in Phase 1).
 
 ---
 
@@ -387,3 +418,10 @@ Coolify restart policy).
 | Weekly | Lint: orphan links, broken wikilinks (RegEx, $0) | $0 | n8n cron → lint_graph.py |
 | Monthly | Confidence decay (-5%) + semantic dedup (cosine > 0.92 → merge) | ~$2–5/tenant | n8n cron → confidence_decay.py |
 | Quarterly | Full audit vs source truth + human review of stale pages | ~$10–20/tenant | Manual trigger |
+
+---
+
+## Decision Traceability
+
+- Department isolation model in this document maps to `D-59` in `docs/04_DECISIONS.md`.
+- i18n infrastructure-first model in this document maps to `D-60` in `docs/04_DECISIONS.md`.
