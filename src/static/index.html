@@ -268,18 +268,85 @@
     .protocol-wrap { padding: 0.75rem 1rem; font-size: 0.85rem; }
     .protocol-wrap ol { margin: 0.35rem 0 0 1.1rem; padding: 0; }
     .protocol-wrap li { margin: 0.25rem 0; }
+    .login-box { max-width: 380px; margin: 80px auto; border: 1px solid var(--border); border-radius: 4px; padding: 1.5rem; background: #121212; }
+    .login-box h1 { font-size: 1.1rem; margin: 0 0 0.2rem; }
+    .login-box .tagline { margin-bottom: 1.25rem; }
+    .login-msg { font-size: 0.8rem; margin-top: 0.5rem; min-height: 1.1em; }
+    .login-msg.err { color: var(--err); }
+    .login-msg.ok { color: var(--ok); }
+    .login-link { background: none; border: none; padding: 0; color: var(--muted); font-size: 0.8rem; font-family: inherit; cursor: pointer; text-decoration: underline; }
+    .login-link:hover { color: var(--fg); }
+    details.magic-details { margin-top: 1rem; border-top: 1px solid var(--border); padding-top: 0.75rem; }
+    details.magic-details summary { cursor: pointer; user-select: none; color: var(--muted); font-size: 0.8rem; list-style: none; outline: none; }
+    details.magic-details summary::before { content: "+ "; }
+    details.magic-details[open] summary::before { content: "− "; }
+    details.magic-details > div { margin-top: 0.75rem; }
+    .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem; }
+    .header-row h1 { margin: 0; }
+    .signout-btn { font-size: 0.72rem; padding: 0.25rem 0.55rem; color: var(--muted); border-color: var(--border); }
+    .signout-btn:hover { color: var(--fg); }
   </style>
 </head>
 <body>
-  <div id="login-section" style="display:none; max-width:400px; margin:80px auto; text-align:center;">
-    <h2>Compilore</h2>
-    <p>Enter your email to receive a magic link.</p>
-    <input id="login-email" type="email" placeholder="you@example.com" style="width:100%;padding:8px;margin-bottom:8px;" />
-    <button id="login-btn">Send magic link</button>
-    <p id="login-status" style="margin-top:12px;"></p>
+  <div id="login-section" style="display:none;">
+    <div class="login-box">
+
+      <!-- Password recovery form (shown when redirected from reset email) -->
+      <div id="recovery-form" style="display:none;">
+        <h1>Compilore</h1>
+        <p class="tagline">Set a new password</p>
+        <label for="new-password">New password</label>
+        <input id="new-password" type="password" placeholder="At least 8 characters" autocomplete="new-password" />
+        <div class="row" style="margin-top:0.65rem;">
+          <button type="button" id="btn-set-password">Update password</button>
+        </div>
+        <p id="recovery-status" class="login-msg"></p>
+      </div>
+
+      <!-- Standard login form -->
+      <div id="login-form">
+        <h1>Compilore</h1>
+        <p class="tagline">Sign in to continue</p>
+        <label for="login-email">Email</label>
+        <input id="login-email" type="email" placeholder="you@example.com" autocomplete="email" />
+        <label for="login-password" style="margin-top:0.65rem;">Password</label>
+        <input id="login-password" type="password" placeholder="Password" autocomplete="current-password" />
+        <div class="row" style="margin-top:0.65rem;">
+          <button type="button" id="btn-signin">Sign in</button>
+        </div>
+        <p id="login-status" class="login-msg"></p>
+        <p style="margin-top:0.6rem;">
+          <button type="button" class="login-link" id="btn-forgot">Forgot password?</button>
+        </p>
+        <div id="forgot-section" style="display:none; margin-top:0.65rem;">
+          <label for="forgot-email">Your email</label>
+          <input id="forgot-email" type="email" placeholder="you@example.com" autocomplete="email" />
+          <div class="row" style="margin-top:0.5rem;">
+            <button type="button" id="btn-send-reset">Send reset email</button>
+          </div>
+          <p id="forgot-status" class="login-msg"></p>
+        </div>
+
+        <details class="magic-details">
+          <summary>Or sign in with magic link</summary>
+          <div>
+            <label for="magic-email">Email</label>
+            <input id="magic-email" type="email" placeholder="you@example.com" autocomplete="email" />
+            <div class="row" style="margin-top:0.5rem;">
+              <button type="button" id="btn-magic">Send magic link</button>
+            </div>
+            <p id="magic-status" class="login-msg"></p>
+          </div>
+        </details>
+      </div>
+
+    </div>
   </div>
   <div id="main-ui" style="display:none;">
-  <h1>Compilore</h1>
+  <div class="header-row">
+    <h1>Compilore</h1>
+    <button type="button" class="signout-btn" id="btn-signout">Sign out</button>
+  </div>
   <p class="tagline">Agentic knowledge compiler — ingest, compile, query (Phase 1 playground)</p>
 
   <section id="sec-url">
@@ -396,36 +463,161 @@
     return Object.assign({ "Authorization": "Bearer " + _token }, extra || {});
   }
 
+  function _showLogin() {
+    document.getElementById("login-section").style.display = "block";
+    document.getElementById("main-ui").style.display = "none";
+  }
+  function _showApp(token) {
+    _token = token;
+    document.getElementById("login-section").style.display = "none";
+    document.getElementById("main-ui").style.display = "block";
+    document.getElementById("login-form").style.display = "block";
+    document.getElementById("recovery-form").style.display = "none";
+  }
+  function _showRecovery() {
+    document.getElementById("login-section").style.display = "block";
+    document.getElementById("main-ui").style.display = "none";
+    document.getElementById("login-form").style.display = "none";
+    document.getElementById("recovery-form").style.display = "block";
+  }
+
   async function _initAuth() {
     const { data: { session } } = await _sb.auth.getSession();
-    var mainUi = document.getElementById("main-ui");
     if (session) {
-      _token = session.access_token;
-      document.getElementById("login-section").style.display = "none";
-      // show main UI (whatever the main container id is)
-      mainUi.style.display = "block";
+      _showApp(session.access_token);
     } else {
-      document.getElementById("login-section").style.display = "block";
-      // hide main UI
-      mainUi.style.display = "none";
+      _showLogin();
     }
-    // handle magic link callback (token in URL hash)
-    _sb.auth.onAuthStateChange((_event, session) => {
+    _sb.auth.onAuthStateChange(function(_event, session) {
+      if (_event === "PASSWORD_RECOVERY") {
+        _showRecovery();
+        return;
+      }
       if (session) {
-        _token = session.access_token;
-        document.getElementById("login-section").style.display = "none";
-        document.getElementById("main-ui").style.display = "block";
+        _showApp(session.access_token);
+      } else {
+        _token = null;
+        _showLogin();
       }
     });
   }
 
-  document.getElementById("login-btn").addEventListener("click", async function() {
-    const email = document.getElementById("login-email").value.trim();
-    if (!email) return;
-    const { error } = await _sb.auth.signInWithOtp({ email });
-    document.getElementById("login-status").textContent = error
-      ? "Error: " + error.message
-      : "Magic link sent! Check your email.";
+  // Email + password sign-in
+  document.getElementById("btn-signin").addEventListener("click", async function() {
+    var email = document.getElementById("login-email").value.trim();
+    var password = document.getElementById("login-password").value;
+    var statusEl = document.getElementById("login-status");
+    statusEl.textContent = "";
+    statusEl.className = "login-msg";
+    if (!email || !password) {
+      statusEl.textContent = "Enter email and password.";
+      statusEl.className = "login-msg err";
+      return;
+    }
+    this.disabled = true;
+    var result = await _sb.auth.signInWithPassword({ email: email, password: password });
+    this.disabled = false;
+    if (result.error) {
+      statusEl.textContent = result.error.message;
+      statusEl.className = "login-msg err";
+    }
+    // success handled by onAuthStateChange
+  });
+
+  // Submit on Enter in password field
+  document.getElementById("login-password").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") document.getElementById("btn-signin").click();
+  });
+
+  // Forgot password toggle
+  document.getElementById("btn-forgot").addEventListener("click", function() {
+    var fs = document.getElementById("forgot-section");
+    var isHidden = fs.style.display === "none";
+    fs.style.display = isHidden ? "block" : "none";
+    if (isHidden) {
+      var em = document.getElementById("login-email").value.trim();
+      if (em) document.getElementById("forgot-email").value = em;
+    }
+  });
+
+  // Send password reset email
+  document.getElementById("btn-send-reset").addEventListener("click", async function() {
+    var email = document.getElementById("forgot-email").value.trim();
+    var statusEl = document.getElementById("forgot-status");
+    statusEl.textContent = "";
+    statusEl.className = "login-msg";
+    if (!email) {
+      statusEl.textContent = "Enter your email address.";
+      statusEl.className = "login-msg err";
+      return;
+    }
+    this.disabled = true;
+    var result = await _sb.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + "/auth/callback"
+    });
+    this.disabled = false;
+    if (result.error) {
+      statusEl.textContent = result.error.message;
+      statusEl.className = "login-msg err";
+    } else {
+      statusEl.textContent = "Reset email sent — check your inbox.";
+      statusEl.className = "login-msg ok";
+    }
+  });
+
+  // Magic link (secondary)
+  document.getElementById("btn-magic").addEventListener("click", async function() {
+    var email = document.getElementById("magic-email").value.trim();
+    var statusEl = document.getElementById("magic-status");
+    statusEl.textContent = "";
+    statusEl.className = "login-msg";
+    if (!email) {
+      statusEl.textContent = "Enter your email address.";
+      statusEl.className = "login-msg err";
+      return;
+    }
+    this.disabled = true;
+    var result = await _sb.auth.signInWithOtp({ email: email });
+    this.disabled = false;
+    if (result.error) {
+      statusEl.textContent = result.error.message;
+      statusEl.className = "login-msg err";
+    } else {
+      statusEl.textContent = "Magic link sent — check your email.";
+      statusEl.className = "login-msg ok";
+    }
+  });
+
+  // Set new password after reset
+  document.getElementById("btn-set-password").addEventListener("click", async function() {
+    var pw = document.getElementById("new-password").value;
+    var statusEl = document.getElementById("recovery-status");
+    statusEl.textContent = "";
+    statusEl.className = "login-msg";
+    if (!pw || pw.length < 8) {
+      statusEl.textContent = "Password must be at least 8 characters.";
+      statusEl.className = "login-msg err";
+      return;
+    }
+    this.disabled = true;
+    var result = await _sb.auth.updateUser({ password: pw });
+    this.disabled = false;
+    if (result.error) {
+      statusEl.textContent = result.error.message;
+      statusEl.className = "login-msg err";
+    } else {
+      statusEl.textContent = "Password updated — signing you in…";
+      statusEl.className = "login-msg ok";
+      setTimeout(function() { window.location.replace("/"); }, 1200);
+    }
+  });
+
+  // Sign out
+  document.getElementById("btn-signout").addEventListener("click", async function() {
+    await _sb.auth.signOut();
+    _token = null;
+    _showLogin();
+    setStatus("Signed out.", "ok");
   });
 
   await _initAuth();

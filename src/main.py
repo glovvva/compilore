@@ -185,6 +185,14 @@ class LintResolveRequest(BaseModel):
     )
 
 
+class AdminSetPasswordRequest(BaseModel):
+    """One-time admin endpoint: set a Supabase Auth user's password by email."""
+
+    email: str = Field(min_length=1)
+    password: str = Field(min_length=8)
+    admin_token: str = Field(min_length=1)
+
+
 @app.get("/health", response_model=APIResponse[HealthResponse])
 def health() -> APIResponse[HealthResponse]:
     """Liveness probe; no dependency checks in Phase 0 scaffold."""
@@ -422,6 +430,65 @@ async def query_format_click(
 
     await run_in_threadpool(_do)
     return envelop({"logged": True})
+
+
+@app.post("/admin/set-password")
+async def admin_set_password(body: AdminSetPasswordRequest) -> dict[str, Any]:
+    """Set a Supabase Auth user's password via the service-role key.
+
+    Disabled (returns 404) when ADMIN_TOKEN env var is not configured.
+    """
+    secret = (os.environ.get("ADMIN_TOKEN") or "").strip()
+    if not secret:
+        raise HTTPException(status_code=404, detail="Not Found")
+    if body.admin_token.strip() != secret:
+        raise HTTPException(status_code=403, detail="Invalid admin_token")
+
+    client = create_supabase_client()
+
+    # Locate user by email (list_users returns all users for small deployments)
+    try:
+        users_resp = await run_in_threadpool(client.auth.admin.list_users)
+        if isinstance(users_resp, list):
+            users = users_resp
+        else:
+            users = getattr(users_resp, "users", None) or list(users_resp)
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Failed to list users: {exc}") from exc
+
+    target = next(
+        (u for u in users if (getattr(u, "email", None) or "").lower() == body.email.strip().lower()),
+        None,
+    )
+    if target is None:
+        raise HTTPException(status_code=404, detail=f"No Supabase user found with email {body.email!r}")
+
+    # Update password via admin API
+    try:
+        await run_in_threadpool(
+            client.auth.admin.update_user_by_id,
+            str(target.id),
+            {"password": body.password},
+        )
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Password update failed: {exc}") from exc
+
+    # Best-effort audit log
+    tenant_id = (os.environ.get("COMPILORE_DEFAULT_TENANT_ID") or "").strip()
+    if tenant_id:
+        try:
+            await run_in_threadpool(
+                insert_wiki_log_row,
+                client,
+                tenant_id=tenant_id,
+                operation="admin_set_password",
+                details={"email": body.email, "user_id": str(target.id)},
+                module="admin",
+            )
+        except Exception:
+            pass
+
+    return {"ok": True, "email": body.email, "user_id": str(target.id)}
 
 
 @app.post("/lint/run", response_model=APIResponse[dict[str, Any]])
