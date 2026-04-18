@@ -203,6 +203,19 @@ async def serve_ui() -> HTMLResponse:
     return HTMLResponse(content=html)
 
 
+@app.get("/auth/callback")
+async def auth_callback() -> HTMLResponse:
+    """Supabase magic-link redirect target. Serves the same SPA so the JS client can
+    exchange the access_token hash fragment and fire onAuthStateChange."""
+    index = _STATIC_DIR / "index.html"
+    if not index.is_file():
+        raise HTTPException(status_code=404, detail="UI not found")
+    html = index.read_text(encoding="utf-8")
+    html = html.replace("%%SUPABASE_URL%%", os.environ.get("SUPABASE_URL", ""))
+    html = html.replace("%%SUPABASE_ANON_KEY%%", os.environ.get("SUPABASE_ANON_KEY", ""))
+    return HTMLResponse(content=html)
+
+
 app.mount("/static", StaticFiles(directory=str(_STATIC_DIR)), name="static")
 
 
