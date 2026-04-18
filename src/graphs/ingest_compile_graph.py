@@ -35,8 +35,12 @@ from src.modules.compile.wiki_generator import (
 from src.modules.compile.wiki_log import append_compile_cost_line
 from src.modules.compile.wiki_storage import write_wiki_page_files
 from src.modules.ingest.markdown_adapter import MarkdownIngestAdapter
-from src.modules.ingest.models import ingest_result_from_mapping, ingest_result_to_mapping
-from src.modules.ingest.pdf_text_adapter import PdfTextIngestAdapter
+from src.modules.ingest.models import (
+    IngestResult,
+    ingest_result_from_mapping,
+    ingest_result_to_mapping,
+)
+from src.modules.ingest.pdf_router import extract_pdf
 from src.modules.ingest.text_adapter import TextIngestAdapter
 from src.modules.ingest.text_paste_adapter import paste_to_ingest_result
 from src.modules.ingest.url_adapter import extract_url
@@ -71,7 +75,7 @@ def _ingest_adapter_module(doc_type: str) -> str:
     return {
         "markdown": "markdown_adapter",
         "text": "text_adapter",
-        "pdf": "pdf_text_adapter",
+        "pdf": "pdf_router",
         "url": "url_adapter",
         "paste": "text_paste_adapter",
     }.get(doc_type, "unknown_adapter")
@@ -136,7 +140,25 @@ def node_read_document(state: IngestCompileState) -> dict[str, Any]:
         elif suffix == ".txt":
             ingest = TextIngestAdapter().extract(path)
         elif suffix == ".pdf":
-            ingest = PdfTextIngestAdapter().extract(path)
+            chunks = extract_pdf(path)
+            body = "\n\n".join(c["text"] for c in chunks).strip()
+            if not body:
+                return {"error": "PDF contained no extractable text"}
+            ingest = IngestResult(
+                body=body,
+                frontmatter={
+                    "adapter_used": (
+                        chunks[0].get("adapter_used", "unknown")
+                        if chunks
+                        else "unknown"
+                    ),
+                    "tables_extracted": sum(
+                        1 for c in chunks if c.get("chunk_type") == "table"
+                    ),
+                },
+                source_path=path.resolve(),
+                doc_type="pdf",
+            )
         else:
             return {
                 "error": f"Unsupported file type for ingest: {suffix} (use .md, .txt, or .pdf)",
@@ -226,6 +248,13 @@ def node_store_to_supabase(state: IngestCompileState) -> dict[str, Any]:
         )
     except Exception as exc:
         return {"error": f"Supabase persist failed: {exc}"}
+    pdf_extract_log = None
+    if ingest.doc_type == "pdf":
+        fm = ingest.frontmatter or {}
+        pdf_extract_log = {
+            "adapter_used": fm.get("adapter_used", "unknown"),
+            "tables_extracted": int(fm.get("tables_extracted", 0)),
+        }
     schedule_wiki_generator_compile_log(
         tenant_id=tenant_id,
         document_id=doc_id,
@@ -233,6 +262,7 @@ def node_store_to_supabase(state: IngestCompileState) -> dict[str, Any]:
         input_tokens=int(state.get("claude_input_tokens", 0)),
         output_tokens=int(state.get("claude_output_tokens", 0)),
         cost_usd=float(state.get("claude_cost_usd", 0)),
+        pdf_extract_log=pdf_extract_log,
     )
     return {"document_id": doc_id, "wiki_page_ids_by_slug": slug_to_id}
 

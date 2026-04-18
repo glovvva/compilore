@@ -114,17 +114,21 @@ def schedule_wiki_generator_compile_log(
     input_tokens: int,
     output_tokens: int,
     cost_usd: float,
+    pdf_extract_log: dict[str, Any] | None = None,
 ) -> None:
     """After compile pages are persisted, log ``wiki_log`` for the wiki_generator module."""
+    details: dict[str, Any] = {
+        "document_id": str(document_id),
+        "pages_created": len(pages),
+        "page_types": [p.page_type for p in pages],
+    }
+    if pdf_extract_log:
+        details.update(pdf_extract_log)
     schedule_insert_wiki_log_row(
         tenant_id=tenant_id,
         operation="compile",
         module="wiki_generator",
-        details={
-            "document_id": str(document_id),
-            "pages_created": len(pages),
-            "page_types": [p.page_type for p in pages],
-        },
+        details=details,
         tokens_used=int(input_tokens) + int(output_tokens),
         cost_usd=float(cost_usd),
     )

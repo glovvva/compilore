@@ -214,6 +214,7 @@ class DoclingAdapter:
                     "page_number": page_no,
                     "chunk_type": "text",
                     "source_path": str(pdf_path),
+                    "adapter_used": "pymupdf",
                 }
             gc.collect()
         doc.close()
