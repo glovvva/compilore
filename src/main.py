@@ -13,7 +13,7 @@ import tempfile
 import time
 import hashlib
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 from fastapi import BackgroundTasks, FastAPI, File, Header, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -149,7 +149,7 @@ class QueryFormatRequest(BaseModel):
         description="mindmap | graph | comparison_table | card | protocol | response_card",
     )
     query_text: str = ""
-    answer_id: str | None = None
+    answer_id: Optional[str] = None
 
 
 class QuerySaveRequest(BaseModel):
@@ -167,8 +167,8 @@ class FormatClickRequest(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
     fmt: str = Field(min_length=1, alias="format")
-    was_useful: bool | None = None
-    answer_id: str | None = None
+    was_useful: Optional[bool] = None
+    answer_id: Optional[str] = None
 
 
 class LintResolveRequest(BaseModel):
@@ -428,7 +428,7 @@ async def lint_resolve(body: LintResolveRequest) -> APIResponse[dict[str, Any]]:
 
 @app.post("/lint/decay", response_model=APIResponse[dict[str, Any]])
 async def lint_decay(
-    x_lint_decay_token: str | None = Header(default=None, alias="X-Lint-Decay-Token"),
+    x_lint_decay_token: Optional[str] = Header(default=None, alias="X-Lint-Decay-Token"),
 ) -> APIResponse[dict[str, Any]]:
     """Monthly confidence decay (n8n / operator). Requires ``X-Lint-Decay-Token``."""
     secret = (os.environ.get("LINT_DECAY_WEBHOOK_SECRET") or "").strip()

@@ -26,7 +26,7 @@ def get_supabase_service_key() -> str:
     return key.strip()
 
 
-def create_supabase_client(url: str | None = None, service_key: str | None = None) -> Client:
+def create_supabase_client(url: Optional[str] = None, service_key: Optional[str] = None) -> Client:
     """Return a Supabase client using the service key (bypasses RLS for backend jobs)."""
     resolved_url = (url or os.environ.get("SUPABASE_URL") or "").strip()
     if not resolved_url:
@@ -69,9 +69,9 @@ def insert_document_row(
     tenant_id: str,
     title: str,
     doc_type: str,
-    file_path: str | None,
+    file_path: Optional[str],
     metadata: dict[str, Any],
-    module: str | None = None,
+    module: Optional[str] = None,
 ) -> str:
     """Insert a ``documents`` row; return new UUID string."""
     ensure_tenant_exists(client, tenant_id)
@@ -226,7 +226,7 @@ def insert_wiki_log_row(
     details: dict[str, Any],
     tokens_used: int = 0,
     cost_usd: float = 0.0,
-    module: str | None = None,
+    module: Optional[str] = None,
 ) -> None:
     """Append one row to ``wiki_log`` (best-effort callers should catch exceptions)."""
     ensure_tenant_exists(client, tenant_id)
@@ -242,7 +242,7 @@ def insert_wiki_log_row(
     client.table("wiki_log").insert(row).execute()
 
 
-async def get_user_organization_id(user_id: str) -> str | None:
+async def get_user_organization_id(user_id: str) -> Optional[str]:
     """
     Returns the primary organization_id for a given user.
     Phase 1: each user has exactly one org.
@@ -275,7 +275,7 @@ def schedule_insert_wiki_log_row(
     details: dict[str, Any],
     tokens_used: int = 0,
     cost_usd: float = 0.0,
-    module: str | None = None,
+    module: Optional[str] = None,
 ) -> None:
     """Fire-and-forget ``insert_wiki_log_row`` (thread if no running asyncio loop)."""
 

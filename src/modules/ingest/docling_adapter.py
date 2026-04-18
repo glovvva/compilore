@@ -134,7 +134,7 @@ class DoclingAdapter:
         pipeline_options = PdfPipelineOptions()
         pipeline_options.do_table_structure = True
         pipeline_options.table_structure_options.mode = mode_enum
-        pipeline_options.do_cell_matching = True
+        pipeline_options.table_structure_options.do_cell_matching = True
 
         converter = DocumentConverter(
             format_options={
