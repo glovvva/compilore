@@ -113,10 +113,6 @@ class DoclingAdapter:
     def _docling_extract(
         self, pdf_path: Path
     ) -> Generator[dict, None, None]:
-        """
-        Core Docling extraction with TableFormer.
-        Processes page-by-page to manage memory.
-        """
         from docling.document_converter import DocumentConverter
         from docling.datamodel.pipeline_options import (
             PdfPipelineOptions,
@@ -147,36 +143,47 @@ class DoclingAdapter:
         result = converter.convert(str(pdf_path))
         doc = result.document
 
-        for page_no, page in enumerate(doc.pages, start=1):
+        # Extract tables (highest value for B2B catalogs)
+        for table in doc.tables:
             try:
-                # Extract tables first (highest value for B2B catalogs)
-                for table in page.tables:
-                    md_table = table.export_to_markdown()
-                    if md_table.strip():
-                        yield {
-                            "text": md_table,
-                            "page_number": page_no,
-                            "chunk_type": "table",
-                            "source_path": str(pdf_path),
-                        }
-
-                # Extract text blocks
-                for block in page.body:
-                    text = block.text.strip() if hasattr(
-                        block, "text"
-                    ) else ""
-                    if len(text) > 50:  # skip noise
-                        yield {
-                            "text": text,
-                            "page_number": page_no,
-                            "chunk_type": "text",
-                            "source_path": str(pdf_path),
-                        }
-
-            except Exception as e:
-                logger.warning(
-                    f"Page {page_no} extraction failed: {e}. Skipping."
+                md_table = table.export_to_markdown()
+                if not md_table.strip():
+                    continue
+                page_no = (
+                    table.prov[0].page_no
+                    if table.prov else 0
                 )
+                yield {
+                    "text": md_table,
+                    "page_number": page_no,
+                    "chunk_type": "table",
+                    "source_path": str(pdf_path),
+                }
+            except Exception as e:
+                logger.warning(f"Table extraction failed: {e}")
+            finally:
+                gc.collect()
+
+        # Extract text blocks
+        for text_item in doc.texts:
+            try:
+                text = text_item.text.strip() if hasattr(
+                    text_item, "text"
+                ) else ""
+                if len(text) < 50:
+                    continue
+                page_no = (
+                    text_item.prov[0].page_no
+                    if text_item.prov else 0
+                )
+                yield {
+                    "text": text,
+                    "page_number": page_no,
+                    "chunk_type": "text",
+                    "source_path": str(pdf_path),
+                }
+            except Exception as e:
+                logger.warning(f"Text extraction failed: {e}")
             finally:
                 gc.collect()
 
