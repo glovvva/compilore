@@ -60,12 +60,13 @@ testing behavior). The pilot must be smooth, well-documented, and closely monito
 
 **Wojtek's task:**
 - Upload 2–3 more manufacturer folders (e.g. APEX, CLECO, SCS)
-- Ask 5 cross-manufacturer questions:
+- Ask 6 cross-manufacturer questions:
   - "Which wkrętarki przetwornikowe from our portfolio support Bluetooth data 
     archiving and have torque range 2–20 Nm?"
   - "Compare KOLVER and CLECO for ESD-safe assembly — what are the differences?"
   - "Which of our tools are certified to ISO 6789-2?"
   - [2 more from Wojtek's real daily queries]
+  - **Audit-readiness stress test:** "Stellantis zgłosił żądanie audytowe na jutro. W <15 minut przygotuj pakiet dla Stacji 4: (a) aktualny certyfikat kalibracji dla narzędzia SN:[X], (b) PFMEA dla tej stacji, (c) ostatnich 100 zapisów programów dokręcania, (d) matryca compliance IATF 16949 clause 7.5.3.2.1 retention." This validates whether Compilore can serve as audit-deadline insurance — a potential future repositioning (see D-85, DR-14 RESULTS in 08_RESEARCH.md).
 
 **We measure:**
 - Cross-document retrieval accuracy
@@ -73,7 +74,7 @@ testing behavior). The pilot must be smooth, well-documented, and closely monito
 - Response time (target: under 10 seconds for query synthesis)
 - Did Wojtek use an answer in a real client interaction? (key signal)
 
-**Success gate:** 4/5 cross-manufacturer queries answered correctly.
+**Success gate:** 5/6 cross-manufacturer queries answered correctly.
 
 ---
 
@@ -149,6 +150,30 @@ Do NOT upload everything at once. Start small, verify quality, then expand.
 3. **Session 3+:** Remaining folders, one at a time.
 
 **Folder naming convention (important for Wiki quality):**
+
+### Questions to surface during normal feedback calls (NOT separate interview)
+
+Weave these into weekly 15-min feedback calls organically. Do not batch. Do not treat as questionnaire. Each question informs decisions currently deferred (D-85, D-86, 10_GRANTS.md Option D activation).
+
+**Week 2-3 (establishing baseline):**
+- What % of your daily time goes to catalog search vs calibration/service coordination vs client engineering support?
+- Which manufacturer's documentation do you dread most when it arrives? Why?
+- Who in HermesTools handles audit responses when OEM clients request data? How often does this happen?
+
+**Week 4-5 (validation of assumptions):**
+- Does HermesTools serve clients who produce D/TLD parts for VW Group? (i.e. are there safety-critical component manufacturers in your client base?)
+- How often do your clients ask for copies of calibration history from previous years? (probing retention workflow)
+- Has the 48-hour Stellantis audit window ever caused you operational pressure?
+
+**Week 6-7 (aerospace footprint):**
+- Beyond distributing RECOULES catalogs, do you have active aerospace clients? Who? (PZL Mielec, Avio, MESKO, WZL, Pratt & Whitney Rzeszów)
+- If yes — what's the difference in your sales process when serving aerospace vs automotive?
+
+**Week 8 (forward-looking):**
+- If Compilore could also surface "everything needed for an audit bundle in 15 minutes," would that be more valuable or less valuable than catalog search?
+- Would your management care about this framing more than productivity framing?
+
+**Strict rule:** Do NOT force the conversation. If Wojtek is deep in catalog search validation, let him finish. These questions accumulate over 8 weeks, not in one call.
 
 ---
 

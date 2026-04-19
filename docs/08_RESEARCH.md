@@ -919,9 +919,186 @@ Tier 3 (regional): Dobra Klima, Klimat Komfort, Solar Polska.
 
 ---
 
+## DR-13 RESULTS: HermesTools Company Facts & EU Grants Reality Check (2026-04-19)
+
+**Source:** Claude session + live web verification (KRS registry, official PARP/ARP/FE Śląskie documentation). Supplements the Gemini Deep Research output which contained factual errors.
+
+### HermesTools company facts (verified against KRS)
+
+| Fact | Verified value | Source |
+|---|---|---|
+| Legal name | HERMESTOOLS SPÓŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ | KRS 0000187483 |
+| KRS number | 0000187483 | rejestr.io |
+| NIP | 547-19-89-332 | official |
+| REGON | 072886045 | official |
+| Registered 1994 (brand) / 2004 Jan 14 (as sp. z o.o.) | ✅ 21+ years as sp. z o.o. | KRS |
+| HQ | Sarni Stok 73a, 43-300 Bielsko-Biała | hermestools.eu |
+| Branches | Poland + Czech Republic + Slovakia | hermestools.eu |
+| Share capital | 50,000 PLN | KRS |
+| Board | Barbara Bohatyrewicz (Prezes), Andrzej J. Murawski (Prokurent) | KRS |
+| Main PKD | **46.14.Z** — Agents involved in wholesale trade of machinery, industrial equipment, ships, and aircraft | aleo.com |
+| Additional PKD | 47.91.Z (non-specialized retail), 82.99.Z (business support), 95.29.Z (repair/maintenance) | aleo.com |
+| Exclusive distribution (Poland) | KOLVER, APEX/Cleco, SCS Concept, Recoules, HAZET, Lobster, Sturtevant Richmont, Pop Avdel, Lubbering, Dotco, Hios, Koken, Fein, Doga, AMT, n-gineric | hermestools.eu + LinkedIn |
+| Offers ISO 6789 torque tool calibration services | ✅ Confirmed | hermestools.eu |
+
+### INTOOL merger — DEBUNKED
+
+The "INTOOL absorption in February 2026" mentioned in Gemini DR-13 briefing is a **hallucination**. No evidence of any Polish industrial tools distributor named INTOOL exists. No M&A public filings found. This means:
+
+- The "post-merger data fragmentation crisis" narrative from Gemini's grant strategy is fabricated
+- Alternative "transformation trigger" narrative needed for any grant application (see 10_GRANTS.md)
+- Do not reference INTOOL in any pitch, application, or strategic doc
+
+### EU Grants — corrected parameters (post web verification)
+
+**FE Śląskie 1.8 "Innowacje cyfrowe w MŚP" — actual parameters (NOT what Gemini report stated):**
+- Maximum subsidy: **up to 60%** (not 70% as in Gemini report) — for medium enterprises
+- Minimum project dofinansowanie: **500,000 PLN** (confirmed)
+- Minimum company age: **3 completed financial years** — HermesTools satisfies (21+ years)
+- Sectoral rule: trading/wholesale firms **are admissible** (confirmed in official FAQ), but production firms are preferenced in scoring
+- Implementation period: 1 year from signing
+- Eligible costs: WNiP (intangible assets), fixed assets, training
+- Next expected window: monitor funduszeue.slaskie.pl — historical pattern is Q2/Q4 annual
+
+**Dig.IT (ARP, FENG 2.21) — actual parameters:**
+- Next nabór: **June 2026** (confirmed by biznes.gov.pl and arp.pl)
+- Subsidy: **up to 50%** of net costs (de minimis aid)
+- Grant range: **150,000–850,000 PLN** (not 300k as in Gemini report)
+- Sectoral rule: **section C PKD (manufacturing) or "usługi produkcyjne"** — repair/maintenance/conservation services to third parties qualify
+- Company age: 5 completed financial years required — HermesTools satisfies
+- **HermesTools qualification question:** Main PKD is 46.14.Z (section G — trade), which is standard disqualification. BUT HermesTools offers ISO 6789 calibration services (repair/maintenance/conservation of precision tools for third parties), which fits the "usługi produkcyjne" definition. Qualification depends on **what % of revenue comes from calibration + assembly station design vs pure distribution trade**. This is a hard open question — must ask Wojtek/HermesTools management. Decision rule:
+  - Revenue from production-adjacent services >50%: real Dig.IT opportunity
+  - 30–50%: high application risk, low probability of formal acceptance
+  - <30%: Dig.IT path closed
+
+**Ścieżka SMART (PARP/NCBR, FENG 1.1):**
+- 2026 MŚP nabór: February–April 2026 (ending 23 April 2026, may be closed by the time this is read)
+- Additional 2026 naborów Q3
+- Minimum project cost for MŚP: **3,000,000 PLN** — structurally unsuitable for Compilore-scale implementation at HermesTools, unless as part of a 3M+ bundle that includes genuine R&D component
+- **Not recommended** for this pilot path — reference only for strategic future
+
+**Kredyt Technologiczny:**
+- Requires patented or own IP-backed technology; commercial SaaS adoption does not qualify
+- **Not applicable** for this case
+
+### Polish grant strategy reality check
+
+Minimum viable FE Śląskie 1.8 project (500k PLN) requires bundling Compilore with:
+- 3-year pre-paid license as WNiP (capital-ized intangible asset): ~150k PLN
+- Hardware integration (workstations, scanners, infrastructure): ~100–150k PLN
+- ERP interoperability / intelligence layer integration: ~150–200k PLN (aligns with D-80 if disclosed)
+- Training + change management for technical advisor team: ~50–100k PLN
+
+The Compilore SaaS fee alone cannot sustain a grant application — bundling is mandatory.
+
+### New "transformation trigger" narratives (replacement for debunked INTOOL)
+
+Three viable options for justifying "zasadnicza zmiana procesu biznesowego":
+
+1. **Regulatory documentation explosion** — IATF 16949 revision 2025, AS9100→IA9100 transition 2026-2027, F-Gas EU 2024/573 torque calibration requirements, Industry 4.0 telemetry archiving mandates. Non-discretionary compliance pressure on HermesTools' end-clients.
+2. **Succession / institutional knowledge capture** — 30+ year company, senior advisors likely approaching retirement. Compilore as enterprise-scale institutional memory. Requires verification: average age of technical advisors at HermesTools.
+3. **ERP modernization prep** — 10-year-old custom ERP as data silo (per D-80). Compilore as intelligence layer = first step toward eventual ERP replacement. Best fit for FE Śląskie 1.8 "zasadnicza zmiana" requirement. Depends on D-80 rekalibration (see updated D-80).
+
+**Recommendation:** Option 3 is strongest but depends on D-80 disclosure decision. Option 1 is safest regardless of D-80.
+
+### Pending verification (to ask Wojtek / HermesTools management)
+
+- [ ] What % of HermesTools revenue comes from calibration services + assembly station design + integration work vs pure distribution trade?
+- [ ] Current headcount (to confirm MŚP classification — medium = up to 250 employees)
+- [ ] Is there an existing active digitalization strategy or documented digital maturity assessment?
+- [ ] Is anyone at HermesTools aware of Dig.IT or FE Śląskie 1.8 opportunity?
+- [ ] Age distribution of technical advisor team (for succession narrative option)
+- [ ] Annual revenue range (to estimate grant ceiling)
+
+## DR-14 RESULTS: Industry 4.0 Documentation Standards & Audit Compliance Angle (2026-04-19)
+
+**Source:** Gemini Deep Research output "Strategiczna Analiza: Rozszerzenie Architektury AI Compilore Poza Wyszukiwanie Katalogowe" + Claude session live verification against primary regulatory sources (IATF official portal, VW Formel Q konkret, Stellantis QRS documents).
+
+**Verification status:** Unlike DR-13 which contained significant hallucinations (INTOOL merger, grant parameter errors), DR-14 core regulatory claims are verified accurate. This is the first DR cycle in this series where downstream decisions can be anchored directly to Gemini's output without heavy correction.
+
+### Verified regulatory facts (usable as-is in grant applications, pitches, client docs)
+
+**IATF 16949 clause 7.5.3.2.1 (Record Retention):**
+Records (PPAP, tooling records, product/process design records, contracts and amendments) must be retained "for the length of time that the product is active for production and service requirements, plus one calendar year" — unless customer or regulatory agency specifies otherwise. 
+
+Critical nuance that amplifies the urgency: retention clock starts at END of active production. For currently-produced automotive models (platforms often run 7-10 years), the effective retention period for a Tier 1/2 supplier is production period + service life + 1 year — commonly 15–30 years total. (Sources: advisera.com/16949academy, Elsmar Quality Forum clause 7.5.3.2.1 discussions, preteshbiswas.com, 16949store.com, IATF official portal)
+
+**VW Formel Q konkret — D/TLD part retention:**
+For parts classified as D (Dokumentationspflichtig) or TLD (Technische Lieferbedingungen Dokumentation) — i.e. safety-critical components — Volkswagen Group mandates 15-year retention "after last production" per VDA Volume 1. Covers drawings, production release docs, test specifications, sample reports, quality records including torque data for safety-critical fasteners. Also requires yearly D/TLD supplier self-audit conducted by VDA 6.3 certified auditors. (Sources: SMR Automotive Appendix P VW CSR 2024-07-30, Henniges Automotive SQA QRL, Ajka Solution training materials, automotivequal.com, Navistar supplier portal Formel Q konkret)
+
+**Stellantis QRS — 48-hour response window:**
+For audit contexts involving ISO/IATF regulatory/certification bodies, Stellantis reduces the maximum response time for supplier data submission to 48 hours. Failure to submit within window triggers incident reporting and penalties applied against supplier. (Source: Stellantis CSR IATF 16949 v1 June 2025 official publication via iatfglobaloversight.org; Huf Group supplier CSR document)
+
+**NADCAP AC7116 / AC7117 (Aerospace special processes):**
+Audit Criteria series AC7116 governs nonconventional machining/holemaking (relevant to RECOULES tool line distributed by HermesTools). AC7117 covers surface enhancement. Both require documented process parameter compliance (SFM/IPR/RPM) with zero-tolerance for deviations. Non-conformance reports trigger production stoppage and potential certification suspension. (Source: raport Gemini DR-14 — primary verification deferred but aligns with known PRI NADCAP structure)
+
+**ISO 6789-2:2017 calibration re-trigger rules:**
+Recalibration required maximum every 12 months OR 5,000 cycles (whichever comes first). Immediate recalibration triggered by any overload, impact, or misuse. Certificate must include expanded relative uncertainty, per-point uncertainty ranges, and accredited laboratory signature (ISO 17025 scope). HermesTools offers this service per PN/ISO/DIN — already captured in 02_STRATEGY.md.
+
+### The underlying strategic thesis
+
+HermesTools is uniquely positioned because three of its business lines (distribution + calibration + assembly station engineering) each generate or touch high-value document corpora:
+
+1. **PFMEA + Control Plans + PFDs** — generated by HermesTools' engineers during assembly station design for OEM clients (VW Poznań, Stellantis Gliwice, Tier 1 suppliers). These are contractually the property of the end-client, but HermesTools retains working-copy knowledge.
+2. **ISO 6789-2:2017 calibration history** — archived by HermesTools after every mobile calibration service at client sites. Represents 30 years of per-tool measurement data.
+3. **Network integration manuals** — KOLVER KDU ↔ Siemens S7-1500 via PROFINET, Modbus TCP register mappings, OPC-UA configurations, IEC 62443 cybersecurity requirements.
+
+These three corpora are **materially different in value from the product catalog corpus** currently targeted by the Compilore pilot. They are the basis for a potential second product segment (not second product — see Trap #1 below).
+
+### Three strategic traps DR-14 report glosses over (must be respected)
+
+**Trap #1 — Telemetry ingestion is not Compilore's fight.** 
+The report suggests Compilore can ingest time-series torque curves from MSSQL/Oracle backends of ToolsTalk 2 / VPG+ / SCS VPG+. This conflates two fundamentally different system categories:
+- Compilore = hybrid search over text (vector + BM25 + RRF)
+- Telemetry analytics = time-series statistical process control over high-frequency sensor data
+
+Adding time-series ingestion pulls Compilore into MES/MOM category, competing with Siemens Opcenter, Rockwell FactoryTalk, AspenTech. This is not our fight. 
+
+**Correct interpretation:** Compilore does NOT read torque curves. Compilore provides interpretive context around torque curves — the PFMEA explaining what should happen, the calibration certificate proving tool validity, the OEM CSR explaining the audit boundary. The human (or ToolsTalk 2) reads the curve; Compilore reads everything around it.
+
+**Trap #2 — Cross-client knowledge graph is a legal minefield.**
+DR-14 sections 4.3 and 4.4 suggest building an anonymized cross-tenant knowledge graph where knowledge from Stellantis Gliwice can help a future VW supplier query. In practice:
+- Polish Ustawa 2018 on trade secrets (implementing EU 2016/943) classifies PFMEA, torque programs, and process parameters as protected
+- Standard OEM Tier 1 contracts contain clauses prohibiting "use of supplier data to train AI models" or "any derivative use beyond the named project"
+- Anonymization techniques offer no legal safe harbor from OEM counsel demands
+- First lawsuit from an OEM would kill HermesTools-Compilore relationship permanently
+
+**Correct interpretation:** Compilore enforces hard `organization_id` isolation (already D-73). No cross-tenant learning. Each client's knowledge base is hermetic. This is a feature for procurement buyers, not a limitation to work around. Logged as D-86.
+
+**Trap #3 — HermesTools is vendor, not OEM.**
+Report occasionally implies Compilore should sell directly to VW Poznań or Stellantis Gliwice. This is a 12–18 month procurement cycle with OEM risk tolerance near zero. HermesTools is our direct client (Phase 2 beachhead per D-70). If Compilore delivers value to HermesTools, HermesTools can position themselves as "Compilore-enhanced service provider" to their OEM clients — but Direct-to-OEM sales is Phase 3+ at earliest.
+
+### The "audit-deadline-driven" sales insight (new — not yet in 02_STRATEGY)
+
+Polish B2B sectoral buying behavior (per DR-9 conservative buyer research) is deadline-driven, not productivity-driven. DR-14 regulatory facts reveal that HermesTools' clients face regular, predictable, externally-imposed deadlines:
+
+- Stellantis 48h window (for audit data) = recurring monthly/quarterly pressure
+- VW D/TLD annual self-audit by VDA 6.3 certified auditor = yearly compliance event
+- ISO 6789 recalibration every 12 months / 5000 cycles = continuous rolling demand
+- AS9100 / NADCAP surveillance audits = semi-annual for aerospace Tier 1/2
+- IATF 16949 retention clock running for decades post-production
+
+This creates a deferred but potentially powerful repositioning of Compilore from "productivity tool for technical advisors" (current: 1,200–1,800 PLN/mo) to "audit-deadline insurance for compliance managers" (potential: 3,500–8,000 PLN/mo). See D-85 for decision framework.
+
+### What belongs in current (pilot-phase) activity
+
+**Do now:**
+- Week 3-4 pilot test: can Compilore generate audit-readiness bundle in <15 min (see 09_PILOT.md update)
+- Ask Wojtek about aerospace footprint (RECOULES customers) during normal pilot feedback — do NOT conduct separate interview
+- Log Option D (audit compliance pressure) as grant transformation narrative (see 10_GRANTS.md)
+- Add `adapters/audit_compliance/` to backlog (see 07_SPRINTS.md)
+
+**Do NOT do now:**
+- Build telemetry ingestion
+- Pitch Compilore to Stellantis or VW directly
+- Design cross-client knowledge graph
+- Launch Insurance pricing tier before pilot validates core premise
+
+**Decision gate for audit-framing pivot:** End of 8-week Wojtek pilot. If pilot succeeds on core catalog search AND audit-bundle test question resolves positively AND HermesTools has real aerospace footprint, then activate D-85 audit-framing strategy.
+
 ## DR-12 + DR-13 + DR-14 — Scheduled (2026-04-19)
 
-**Status:** Prompts prepared, not yet executed in Gemini.
+**Status:** DR-12 still pending execution. DR-13 executed with significant factual errors, superseded by DR-13 RESULTS (2026-04-19). DR-14 executed 2026-04-19, core regulatory claims verified accurate, findings captured in DR-14 RESULTS (2026-04-19) above — first research cycle in this series usable with minimal correction.
 Prompts authored in Claude session 2026-04-19.
 
 ### DR-12: HermesTools Industry Deep Dive
@@ -963,9 +1140,8 @@ process knowledge compilation (higher ARPU, deeper moat).
 **Pending actions after DR results:**
 - [ ] Update 09_PILOT.md Week 1-2 test questions with 
       DR-12 findings
-- [ ] Assess grant feasibility for HermesTools 
-      (DR-13 findings)
-- [ ] Evaluate Industry 4.0 as Phase 3 use case 
-      (DR-14 findings)
+- [x] Assess grant feasibility for HermesTools (DR-13 RESULTS, 2026-04-19)
+- [x] Evaluate Industry 4.0 as Phase 3 use case (DR-14 RESULTS, 2026-04-19 — logged as deferred decision D-85, activation trigger: end of Wojtek pilot)
+- [x] Update 09_PILOT.md Week 3-4 test questions with DR-14 audit-bundle scenario (this session)
 
 ---

@@ -1,7 +1,7 @@
 # 07 — SPRINTS
 ## Compilore: Sprint Plan, Status, Backlog
 
-**Last updated:** 2026-04-17
+**Last updated:** 2026-04-19
 
 ---
 
@@ -352,6 +352,7 @@ Items that are defined but not yet assigned to a sprint:
 | PII stripping middleware | Phase 2 | spaCy NER + RegEx |
 | Technical Advisor query flow wiring | ICP — Technical Advisor | ✅ done 2026-04-16. Feature flag: TECHNICAL_ADVISOR_MODE=true in .env. Default off. Core query_graph.py untouched. |
 | Technical Advisor Docling table extraction | ICP — Technical Advisor / Phase 2 | Replace PyMuPDF for manufacturer catalogs. TableFormer ACCURATE mode. See adapters/technical_advisor/README.md |
+| `adapters/audit_compliance/` | Phase 3 | Placeholder for audit-bundle output format. Generates consolidated PDF/Markdown package for on-demand audit events: calibration certs + PFMEA + recent torque program logs + IATF/VDA retention matrices. Activation trigger: D-85 pilot success. Do NOT build until pilot validates audit-bundle Week 3-4 test question. See DR-14 RESULTS in 08_RESEARCH.md. |
 | PreResponseChecklist in gatekeeper | Quality | Self-verification loop after evaluation: gatekeeper checks own reasoning vs N×N×G criteria. ~14pp quality improvement per GapRoll harness research. TODO already in `gatekeeper.py` docstring. |
 | VLM fallback (GPT-4o Vision) | Phase 2 | Scanned pages/maps |
 | plan_ogolny_adapter.py | Phase 2 | Distinct from MPZP (reform 2026) |

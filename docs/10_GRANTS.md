@@ -189,10 +189,34 @@ fit for FE Śląskie 1.8 "zasadnicza zmiana procesu biznesowego"
 requirement. **Requires D-84 pilot success gate hit** — only viable 
 if disclosed to HermesTools management.
 
-### Selection rule
-- If pilot succeeds and D-84 disclosure triggered → Option C (strongest)
-- If pilot succeeds but D-84 stays private → Option A (safe)
-- If pilot hits B-specific triggers (retirement narrative lands) → Option B
+### Option D — Automotive OEM audit compliance pressure (strongest when DR-14 facts apply)
+HermesTools' automotive end-clients (Stellantis Gliwice, VW Poznań, Tier 1/2 suppliers) operate under escalating compliance obligations:
+- IATF 16949 clause 7.5.3.2.1 retention (active production + 1 year — effectively 15–30 years for active automotive models)
+- VW Formel Q konkret D/TLD — 15 years post-production retention, yearly VDA 6.3 self-audit
+- Stellantis QRS — 48-hour audit response window enforced with penalties
+- NADCAP AC7116/AC7117 for aerospace (RECOULES line) — rolling surveillance audits
+
+HermesTools as calibration service provider and assembly station designer is structurally embedded in its clients' compliance chain. Every calibration certificate HermesTools issues becomes a permanent artifact in its client's 15-year retention policy. As retention volumes compound year-over-year, HermesTools' capacity to serve these obligations digitally becomes a bottleneck. Compilore is the infrastructure that lets HermesTools scale its audit-readiness service to cover growing compliance demand without linear headcount growth.
+
+**Why this is the strongest narrative when applicable:**
+- External regulatory pressure — grant evaluators recognize non-discretionary drivers as strongest justification
+- Quantifiable — number of audit requests per year, retention volume per client, cost per compliance event
+- Prospective — volumes grow with every passing year (retention clock runs forward)
+- Bridges immediate operational benefit (audit readiness) with structural transformation (institutional compliance capacity)
+
+**Activation conditions:** 
+1. Wojtek pilot validates Week 3-4 audit-bundle test question
+2. HermesTools management confirms calibration + OEM integration workload actually dominates vs pure distribution
+3. Preferably also: HermesTools has real aerospace footprint (not just RECOULES catalog presence)
+
+If all three conditions hold → this becomes the primary FE Śląskie 1.8 narrative over Option C. If only some hold → supplement Option A or C with audit-pressure language.
+
+### Selection rule (updated 2026-04-19)
+- Pilot succeeds + aerospace footprint confirmed + calibration revenue dominant → **Option D primary, Option C supplementary**
+- Pilot succeeds + D-84 disclosure trigger hit (ERP angle reveal possible) → **Option C primary, Option D supplementary**
+- Pilot succeeds without audit or ERP angle signals → **Option A (regulatory documentation pressure, safe default)**
+- Pilot hits succession demographic signals (advisor age distribution) → **Option B**
+- Narratives are not mutually exclusive — a strong application may weave Option A + Option C + Option D for maximum scoring
 
 ## 7. ROLE ALLOCATION (Headframe vs Client vs External)
 
@@ -258,6 +282,9 @@ active through pilot + PoC fees.
 - [ ] D-84 disclosure trigger resolution after Week 4 pilot metrics
 - [ ] FE Śląskie 1.8 2026 nabór schedule (monitor funduszeue.slaskie.pl)
 - [ ] Dig.IT June 2026 regulamin publication (monitor digit.arp.pl)
+- [ ] HermesTools aerospace client footprint — real contracts beyond RECOULES catalog distribution? (PZL Mielec, Avio Polska, MESKO, WZL) — ask during pilot Week 4-6
+- [ ] Annual audit event volume at HermesTools' automotive clients (to size Option D economic case)
+- [ ] Whether HermesTools already offers "audit readiness" as named service or as bundled calibration follow-up
 
 ## 11. SOURCES
 
@@ -268,6 +295,6 @@ active through pilot + PoC fees.
 - KRS HermesTools: rejestr.io/krs/187483/hermestools, aleo.com, imsig.pl
 
 **Internal:**
-- 04_DECISIONS.md D-70 (beachhead pivot), D-80/D-84 (ERP angle disclosure), D-82 (Biała Lista), D-83 (grants as GTM lever)
-- 08_RESEARCH.md DR-9 (conservative buyer psychology), DR-11 (market sizing + grant GTM lever), DR-13 RESULTS (HermesTools facts + grant reality)
+- 04_DECISIONS.md D-70 (beachhead pivot), D-80/D-84 (ERP angle disclosure), D-82 (Biała Lista), D-83 (grants as GTM lever), D-85 (audit-framing deferred), D-86 (no cross-tenant learning)
+- 08_RESEARCH.md DR-9 (conservative buyer psychology), DR-11 (market sizing + grant GTM lever), DR-13 RESULTS (HermesTools facts + grant reality), DR-14 RESULTS (audit compliance + OEM regulatory facts)
 - 09_PILOT.md (Wojtek pilot framework — success gates drive this playbook's decision tree)

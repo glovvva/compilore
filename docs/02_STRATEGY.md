@@ -1,7 +1,7 @@
 # 02 — STRATEGY
 ## Compilore: Market, GTM, Pricing, Risks
 
-**Last updated:** 2026-04-17
+**Last updated:** 2026-04-19
 
 ---
 
@@ -104,6 +104,8 @@ This market does NOT respond to LinkedIn-first, build-in-public, or standard Saa
 | **Company** | 3,500–5,000 PLN/msc | 10–50 | Unlimited | Unlimited | API access, dedicated onboarding |
 | **Enterprise** | Custom 8,000+ PLN/msc | 50+ | Unlimited | Unlimited | On-premises option, SLA |
 
+**Deferred pricing consideration (activation trigger: pilot success + D-85 activation):** Research indicates that audit-deadline-driven positioning (48h Stellantis response, 15-year VW D/TLD retention, IATF 16949 retention compounding) may support a premium tier priced as "compliance insurance" rather than productivity tooling. Early estimate 3,500–8,000 PLN/mo for organizations with material OEM audit exposure. Do not introduce this tier before 8-week pilot validation of core catalog search + audit-bundle test question. See D-85 and 10_GRANTS.md Option D.
+
 **ROI framing for sales:** Technical advisor costs ~€2,950/msc gross. 35% of time wasted = €1,000+/msc drain per person. Team tier at 1,500 PLN/msc for 5 advisors = 5x ROI minimum. Pitch: cost of the tool < cost of one hour of the problem per week.
 
 **Trial:** 14-day free trial per organization (not per user). Pilot users (like Wojtek) = extended manual pilot tracked separately.
@@ -120,7 +122,7 @@ This market does NOT respond to LinkedIn-first, build-in-public, or standard Saa
 
 **Moat:** Compiled organizational Wiki. After 3 months of use, a firm has a proprietary, structured knowledge base of every manufacturer catalog they work with. New employee onboarding = query the Wiki instead of sitting next to a senior advisor for a year. Churn = losing that institutional memory. Data lock-in is a feature, framed as "your firm's technical memory."
 
-**Trust mechanism:** Every answer must include exact source citation (document name + page number). No citation = answer not shown. This is non-negotiable in this sector — one wrong recommendation = structural failure, chemical hazard, or MDR violation. Citation trail is the product, not a UX nicety.
+**Trust mechanism:** Every answer must include exact source citation (document name + page number). No citation = answer not shown. This is non-negotiable in this sector — one wrong recommendation = structural failure, chemical hazard, or MDR violation. Citation trail is the product, not a UX nicety. For automotive and aerospace clients specifically, citation trail is not just a trust mechanism — it is the legal artifact needed to satisfy IATF 16949 clause 7.5.3.2.1 retention obligations and VW Formel Q D/TLD 15-year archival requirements. Every Compilore answer with full citation trail is, by construction, audit-ready. This is a structural competitive advantage over proprietary vendor silos (ToolsTalk 2, VPG+) which do not natively produce human-readable cited artifacts. (See DR-14 RESULTS in 08_RESEARCH.md for regulatory detail.)
 
 ---
 
