@@ -245,8 +245,8 @@ def _ingest_file_background(tmp_path: Path, original_filename: str, tenant_id: s
 
 @app.post("/ingest", response_model=APIResponse[dict[str, Any]])
 async def ingest_document(
-    file: UploadFile = File(...),
     background_tasks: BackgroundTasks,
+    file: UploadFile = File(...),
     tenant_id: str = Depends(get_current_tenant_id),
 ) -> APIResponse[dict[str, Any]]:
     """Upload Markdown, plain text, or native-digital PDF; returns immediately, processes in background."""
