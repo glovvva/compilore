@@ -236,9 +236,11 @@ def _ingest_file_background(tmp_path: Path, original_filename: str, tenant_id: s
             tenant_id=tenant_id,
         )
         if err:
-            _logger.error("File ingest failed: %s", err)
+            _logger.error("File ingest failed for %r: %s", original_filename, err)
         else:
-            _logger.info("File ingest completed: %s wiki page(s)", len(pages))
+            _logger.info("File ingest completed for %r: %s wiki page(s)", original_filename, len(pages))
+    except Exception:
+        _logger.exception("File ingest raised an unhandled exception for %r", original_filename)
     finally:
         tmp_path.unlink(missing_ok=True)
 
