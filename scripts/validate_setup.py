@@ -43,11 +43,7 @@ def main() -> None:
 
     # --- Environment ---
     supabase_url = (os.environ.get("SUPABASE_URL") or "").strip()
-    service_key = (
-        os.environ.get("SUPABASE_SERVICE_KEY")
-        or os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
-        or ""
-    ).strip()
+    service_key = (os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or "").strip()
     tenant_id = (os.environ.get("COMPILORE_DEFAULT_TENANT_ID") or "").strip()
     db_url = (os.environ.get("SUPABASE_DB_URL") or "").strip()
     anthropic_key = (os.environ.get("ANTHROPIC_API_KEY") or "").strip()
@@ -56,7 +52,7 @@ def main() -> None:
     if not supabase_url or not service_key:
         bad(
             "Environment",
-            "SUPABASE_URL and SUPABASE_SERVICE_KEY (or SUPABASE_SERVICE_ROLE_KEY) must be set",
+            "SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set",
         )
     else:
         ok("Environment", "Supabase URL + service key present")

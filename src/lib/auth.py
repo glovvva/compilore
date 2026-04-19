@@ -7,7 +7,7 @@ async def get_current_tenant_id(authorization: str = Header(...)) -> str:
     token = authorization.removeprefix("Bearer ")
     supabase = create_client(
         os.environ["SUPABASE_URL"],
-        os.environ["SUPABASE_SERVICE_KEY"]
+        os.environ["SUPABASE_SERVICE_ROLE_KEY"]
     )
     user_response = supabase.auth.get_user(token)
     if not user_response.user:

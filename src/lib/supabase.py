@@ -19,9 +19,9 @@ _TENANT_FK_HINT = (
 
 def get_supabase_service_key() -> str:
     """Resolve service key from env (supports legacy role key name)."""
-    key = os.environ.get("SUPABASE_SERVICE_KEY") or os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+    key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
     if not key or not key.strip():
-        msg = "Set SUPABASE_SERVICE_KEY (or SUPABASE_SERVICE_ROLE_KEY) for server-side access"
+        msg = "Set SUPABASE_SERVICE_ROLE_KEY for server-side access"
         raise RuntimeError(msg)
     return key.strip()
 
