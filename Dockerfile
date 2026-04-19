@@ -46,4 +46,4 @@ CMD ["sh", "-c", \
         (git -C wiki diff --cached --quiet || git -C wiki commit -m 'docker: initial wiki') && \
         (git -C wiki rev-parse HEAD >/dev/null 2>&1 || git -C wiki commit --allow-empty -m 'docker: empty wiki'); \
       fi && \
-      exec uvicorn src.main:app --host 0.0.0.0 --port 8000"]
+      exec uvicorn src.main:app --host 0.0.0.0 --port 8000 --timeout-keep-alive 600"]

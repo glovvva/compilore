@@ -1030,8 +1030,11 @@
     fd.append("file", input.files[0]);
     setLoading("spin-file", ["btn-file"], true);
     setStatus("Uploading file…");
+    var _fileController = new AbortController();
+    var _fileTimeout = setTimeout(function() { _fileController.abort(); }, 600000);
     try {
-      var res = await fetch("/ingest", { method: "POST", headers: _authHeaders(), body: fd });
+      var res = await fetch("/ingest", { method: "POST", headers: _authHeaders(), body: fd, signal: _fileController.signal });
+      clearTimeout(_fileTimeout);
       var data = await safeJson(res);
       if (!res.ok) {
         var d = data && data.detail != null ? formatDetail(data.detail) : res.statusText;
@@ -1039,9 +1042,19 @@
         setStatus("File ingest failed: " + d, "err");
         return;
       }
-      renderPages(document.getElementById("out-file"), data);
-      setStatus("File ingest OK — " + (data && data.length) + " page(s)", "ok");
+      var outFile = document.getElementById("out-file");
+      if (data && data.status === "accepted") {
+        outFile.innerHTML =
+          '<p class="meta-line"><strong>Processing started</strong> — ' +
+          escapeHtml(data.filename || "") +
+          " is being processed in the background. Large PDFs take 3–5 minutes. Re-query when done.</p>";
+        setStatus("File ingest accepted — processing in background", "ok");
+      } else {
+        renderPages(outFile, Array.isArray(data) ? data : []);
+        setStatus("File ingest OK — " + (data && data.length) + " page(s)", "ok");
+      }
     } catch (e) {
+      clearTimeout(_fileTimeout);
       var net = e && e.message ? e.message : String(e);
       showErr("err-file", "Network error: " + net);
       setStatus("File ingest: network error", "err");

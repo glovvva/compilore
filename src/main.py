@@ -227,12 +227,29 @@ async def auth_callback() -> HTMLResponse:
 app.mount("/static", StaticFiles(directory=str(_STATIC_DIR)), name="static")
 
 
-@app.post("/ingest", response_model=APIResponse[list[WikiPage]])
+def _ingest_file_background(tmp_path: Path, original_filename: str, tenant_id: str) -> None:
+    """Run file ingest after HTTP response (BackgroundTasks). Cleans up temp file on exit."""
+    try:
+        pages, err = run_ingest_compile(
+            temp_path=tmp_path,
+            original_filename=original_filename,
+            tenant_id=tenant_id,
+        )
+        if err:
+            _logger.error("File ingest failed: %s", err)
+        else:
+            _logger.info("File ingest completed: %s wiki page(s)", len(pages))
+    finally:
+        tmp_path.unlink(missing_ok=True)
+
+
+@app.post("/ingest", response_model=APIResponse[dict[str, Any]])
 async def ingest_document(
     file: UploadFile = File(...),
+    background_tasks: BackgroundTasks,
     tenant_id: str = Depends(get_current_tenant_id),
-) -> APIResponse[list[WikiPage]]:
-    """Upload Markdown, plain text, or native-digital PDF; run ingest→compile graph."""
+) -> APIResponse[dict[str, Any]]:
+    """Upload Markdown, plain text, or native-digital PDF; returns immediately, processes in background."""
     filename = file.filename or "upload"
     suffix = Path(filename).suffix.lower()
     if suffix not in _ALLOWED_UPLOAD_SUFFIXES:
@@ -243,23 +260,13 @@ async def ingest_document(
 
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=suffix)
     tmp_path = Path(tmp.name)
-    try:
-        body = await file.read()
-        tmp.write(body)
-        tmp.flush()
-        tmp.close()
-        pages, err = await run_in_threadpool(
-            run_ingest_compile,
-            temp_path=tmp_path,
-            original_filename=filename,
-            tenant_id=tenant_id,
-        )
-    finally:
-        tmp_path.unlink(missing_ok=True)
+    body = await file.read()
+    tmp.write(body)
+    tmp.flush()
+    tmp.close()
 
-    if err:
-        raise HTTPException(status_code=502, detail=err)
-    return envelop(pages)
+    background_tasks.add_task(_ingest_file_background, tmp_path, filename, tenant_id)
+    return envelop({"status": "accepted", "filename": filename})
 
 
 @app.post("/ingest/url", response_model=APIResponse[list[WikiPage]])
