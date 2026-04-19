@@ -2,6 +2,7 @@
 ## Compilore: Wojtek / HermesTools Pilot Program
 
 **Created:** 2026-04-17
+**Last updated:** 2026-04-19
 **Status:** Active — awaiting domain/SSL setup
 **Pilot user:** Wojtek (Technical Advisor, HermesTools Sp. z o.o.)
 **Company:** HermesTools Sp. z o.o., Bielsko-Biała — industrial assembly tools 
@@ -120,15 +121,18 @@ testing behavior). The pilot must be smooth, well-documented, and closely monito
 
 ### Before first login
 **Prerequisites checklist (Bartek, before Wojtek's login):**
-- [ ] Domain/SSL configured and working
-- [ ] Wojtek's Supabase Auth account created and added to 
-      `hermes-pilot` organization (org_id: 
-      a6d3721a-0000-0000-0000-000000000002)
-- [ ] Docling installed: `pip install docling` in production venv
-- [ ] Test upload: one KOLVER or HAZET PDF — verify table 
-      extraction works and returns Markdown tables
-- [ ] Biała Lista: bank account update submitted to US 
-      (NIP-2 form) — must be processed before any paid invoice
+- [ ] Domain/SSL configured and working (blocked — separate issue)
+- [x] Wojtek's Supabase Auth account created 
+      (wojtek-igi@wp.pl, id: c79b66ea-b564-4332-8fa5-46693e2d675e)
+- [ ] Wojtek's account added to hermes-pilot org_members 
+      (pending domain/SSL confirmation)
+- [x] Docling installed and validated on KOLVER catalog
+- [x] organization_id isolation active — hermes-pilot org seeded
+- [ ] Bartek password set via /admin/set-password
+- [ ] Wojtek password set via /admin/set-password and 
+      communicated securely
+- [ ] Supabase Redirect URL updated to production domain 
+      (currently set to 127.0.0.1:8001/auth/callback for local)
 
 Bartek sends Wojtek:
 1. Login link + credentials
@@ -145,3 +149,15 @@ Do NOT upload everything at once. Start small, verify quality, then expand.
 3. **Session 3+:** Remaining folders, one at a time.
 
 **Folder naming convention (important for Wiki quality):**
+
+---
+
+## 9. KNOWN TECHNICAL CONSTRAINTS
+
+| Constraint | Impact | Status |
+|---|---|---|
+| Python 3.9 venv | All type hints must use Optional[X] not X\|None | Fixed in main.py + supabase.py. Watch for regressions. |
+| Docling export_to_markdown deprecation | Warning noise in logs, no functional impact | Pending fix: pass doc argument |
+| Magic link redirect | Requires correct Supabase Redirect URL per environment | Set to /auth/callback. Must update for each new domain. |
+| ADMIN_TOKEN env var | POST /admin/set-password returns 404 if not set | Must be in .env before setting user passwords |
+| Wojtek org_members row | Wojtek cannot log in until row added manually | Pending domain/SSL + user_id confirmation |

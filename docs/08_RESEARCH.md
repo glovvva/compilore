@@ -4,7 +4,7 @@
 **This is a living document.** Each Deep Research session adds a new dated section.
 Findings here directly inform decisions logged in 04_DECISIONS.md.
 
-**Last updated:** 2026-04-17
+**Last updated:** 2026-04-19
 
 ---
 
@@ -916,5 +916,56 @@ Onninen (Kesko), Klima-Therm, Bims Plus, Wienkra, Schiessl Polska.
 Tier 2 (national specialists): Systherm, Hydrosolar, Grodno S.A., 
 TIM S.A., Alfa Elektro, Centrum Klima, Iglotech, Ventia, Alnor.
 Tier 3 (regional): Dobra Klima, Klimat Komfort, Solar Polska.
+
+---
+
+## DR-12 + DR-13 + DR-14 — Scheduled (2026-04-19)
+
+**Status:** Prompts prepared, not yet executed in Gemini.
+Prompts authored in Claude session 2026-04-19.
+
+### DR-12: HermesTools Industry Deep Dive
+**Scope:** Precision assembly tools distribution specifics —
+document corpus anatomy, parametric query types, mandatory 
+compliance docs (ISO 6789, ESD, aerospace AS9100), 
+manufacturer portal limitations (KOLVER, APEX, CLECO, SCS), 
+Industry 4.0 documentation burden, competitive landscape 
+for this specific niche.
+
+**Why:** Wojtek pilot test questions and onboarding framework 
+need to be calibrated to actual HermesTools workflow, not 
+generic HVAC/electrical assumptions.
+
+### DR-13: EU Grants for HermesTools — Compilore Implementation
+**Scope:** PARP Ścieżka SMART, Dig.IT, Kredyt Technologiczny, 
+FE Śląskie regional funds. Specific to Śląskie voivodeship 
+(Bielsko-Biała). Can SaaS subscription qualify as 
+cyfryzacja? INTOOL absorption as transformation trigger. 
+Headframe as consortium partner angle.
+
+**Why:** If 50-85% of license cost is subsidized, entire 
+sales conversation changes — from "kup narzędzie" to 
+"pomożemy ci dostać grant na to". Eliminates budget 
+objection entirely.
+
+### DR-14: Industry 4.0 Smart Tools & Documentation Standards
+**Scope:** IATF 16949 / AS9100 torque documentation requirements, 
+smart tool data (KOLVER KDS torque curves, PROFINET/OPC-UA 
+integration docs), RECOULES aerospace NADCAP angle, 
+Desoutter/Atlas Copco competition, potential second use 
+case for Compilore as "AI layer above torque data".
+
+**Why:** HermesTools offers calibration services and assembly 
+station design — they already touch process documentation. 
+This may expand Compilore from catalog search into 
+process knowledge compilation (higher ARPU, deeper moat).
+
+**Pending actions after DR results:**
+- [ ] Update 09_PILOT.md Week 1-2 test questions with 
+      DR-12 findings
+- [ ] Assess grant feasibility for HermesTools 
+      (DR-13 findings)
+- [ ] Evaluate Industry 4.0 as Phase 3 use case 
+      (DR-14 findings)
 
 ---
