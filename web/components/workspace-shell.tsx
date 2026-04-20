@@ -1,3 +1,9 @@
+// ⚠️ PANELS ARE INTENTIONALLY NON-COLLAPSIBLE
+// Do not add collapsible, collapsedSize, or collapse/expand logic.
+// This has been a recurring bug (fixed 4 times, keeps regressing).
+// Panels are resizable via drag but CANNOT be collapsed.
+// If you need to change panel behavior, consult the decision log first.
+
 "use client";
 
 import * as React from "react";
@@ -7,7 +13,6 @@ import {
   Separator,
   useDefaultLayout,
 } from "react-resizable-panels";
-import type { PanelImperativeHandle } from "react-resizable-panels";
 import { WikiNavBridge } from "@/components/wiki-nav-bridge";
 import { QueryPanel } from "@/components/query-panel";
 import { InspectorPanel } from "@/components/inspector-panel";
@@ -26,15 +31,48 @@ const DEFAULT_LAYOUT = { "wiki-nav": 20, main: 58, inspector: 22 } as const;
  * Side panels are fixed visible (not collapsible); separators remain drag handles.
  */
 export function WorkspaceShell({ children }: { children?: React.ReactNode }) {
+  const [layoutReady, setLayoutReady] = React.useState(false);
+
+  React.useEffect(() => {
+    const keys = ["compilore-panel-layout", "compilore-panel-state"];
+
+    for (const key of keys) {
+      const saved = localStorage.getItem(key);
+      if (!saved) continue;
+
+      try {
+        const layout = JSON.parse(saved);
+        const sizes =
+          Array.isArray(layout)
+            ? layout
+            : Array.isArray(layout?.layout)
+              ? layout.layout
+              : [];
+        const hasCollapsed = sizes.some((size: number) => size < 5);
+        if (hasCollapsed) {
+          localStorage.removeItem(key);
+        }
+      } catch {
+        localStorage.removeItem(key);
+      }
+    }
+
+    setLayoutReady(true);
+  }, []);
+
   const { defaultLayout, onLayoutChanged } = useDefaultLayout({
     id: "compilore-workspace",
     panelIds: ["wiki-nav", "main", "inspector"],
     storage: createCompilorePanelStorage(),
   });
 
-  /** Unattached stubs: nav/inspector still pass `panelRef` for optional collapse buttons (no-op). */
-  const stubLeftPanelRef = React.useRef<PanelImperativeHandle | null>(null);
-  const stubRightPanelRef = React.useRef<PanelImperativeHandle | null>(null);
+  if (!layoutReady) {
+    return (
+      <div className="flex h-dvh max-h-dvh items-center justify-center bg-background text-sm text-muted-foreground">
+        Ładowanie układu...
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-dvh max-h-dvh flex-col overflow-hidden bg-background text-foreground">
@@ -55,7 +93,7 @@ export function WorkspaceShell({ children }: { children?: React.ReactNode }) {
           maxSize={35}
           className="min-w-0"
         >
-          <WikiNavBridge panelRef={stubLeftPanelRef} />
+          <WikiNavBridge panelRef={{ current: null }} />
         </Panel>
 
         <Separator className="w-2 shrink-0 bg-border" />
@@ -73,7 +111,7 @@ export function WorkspaceShell({ children }: { children?: React.ReactNode }) {
           maxSize={40}
           className="min-w-0"
         >
-          <InspectorPanel panelRef={stubRightPanelRef} />
+          <InspectorPanel panelRef={{ current: null }} />
         </Panel>
       </Group>
 

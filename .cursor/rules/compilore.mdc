@@ -17,3 +17,9 @@ alwaysApply: true
 - **Wiki:** The Wiki is Git-versioned Markdown. **Every write to the Wiki must result in a Git commit** (atomic, traceable changes).
 
 When in doubt, align with `COMPILORE_PROJECT_BRIEF_v2.md`.
+
+## Panel Rules
+
+- `workspace-shell.tsx` panels are PERMANENTLY NON-COLLAPSIBLE.
+- Never add `collapsible`, `collapsedSize`, or collapse/expand logic to workspace panels.
+- This is an intentional design decision, not a missing feature.
