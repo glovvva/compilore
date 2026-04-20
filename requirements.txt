@@ -72,7 +72,6 @@ multidict==6.7.1
 multiprocess==0.70.19
 networkx==3.2.1
 numpy==2.0.2
-ocrmac==1.0.1
 omegaconf==2.3.0
 openai==2.31.0
 opencv-python==4.13.0.92
@@ -98,11 +97,6 @@ pyiceberg==0.10.0
 PyJWT==2.12.1
 pylatexenc==2.10
 PyMuPDF==1.26.5
-pyobjc-core==12.0
-pyobjc-framework-Cocoa==12.0
-pyobjc-framework-CoreML==12.0
-pyobjc-framework-Quartz==12.0
-pyobjc-framework-Vision==12.0
 pyparsing==3.3.2
 pypdfium2==5.7.0
 pyroaring==1.0.4

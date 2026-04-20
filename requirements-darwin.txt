@@ -1,0 +1,8 @@
+# macOS-only extras — install on local dev, NOT in Docker/Linux builds.
+# pip install -r requirements-darwin.txt
+ocrmac==1.0.1
+pyobjc-core==12.0
+pyobjc-framework-Cocoa==12.0
+pyobjc-framework-CoreML==12.0
+pyobjc-framework-Quartz==12.0
+pyobjc-framework-Vision==12.0
