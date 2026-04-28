@@ -22,7 +22,7 @@ import { CommandPalette } from "@/components/command-palette";
 import { IngestModal } from "@/components/ingest-modal";
 import { createCompilorePanelStorage } from "@/lib/panel-storage";
 
-const DEFAULT_LAYOUT = { "wiki-nav": 25, main: 50, inspector: 25 } as const;
+const DEFAULT_LAYOUT = { "wiki-nav": 30, main: 45, inspector: 25 } as const;
 
 /**
  * Application chrome: resizable **wiki / query / inspect** columns, status bar,
@@ -48,7 +48,7 @@ export function WorkspaceShell({ children }: { children?: React.ReactNode }) {
             : Array.isArray(layout?.layout)
               ? layout.layout
               : [];
-        const hasCollapsed = sizes.some((size: number) => size < 5);
+        const hasCollapsed = sizes.some((size: number) => size < 20);
         if (hasCollapsed) {
           localStorage.removeItem(key);
         }
@@ -88,9 +88,9 @@ export function WorkspaceShell({ children }: { children?: React.ReactNode }) {
       >
         <Panel
           id="wiki-nav"
-          defaultSize={25}
-          minSize={20}
-          maxSize={40}
+          defaultSize={30}
+          minSize={25}
+          maxSize={45}
           className="min-w-0"
         >
           <WikiNavBridge panelRef={{ current: null }} />
@@ -98,7 +98,7 @@ export function WorkspaceShell({ children }: { children?: React.ReactNode }) {
 
         <Separator className="w-2 shrink-0 bg-border" />
 
-        <Panel id="main" minSize={25} className="min-w-0">
+        <Panel id="main" minSize={20} className="min-w-0">
           <QueryPanel>{children}</QueryPanel>
         </Panel>
 
