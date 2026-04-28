@@ -1,12 +1,11 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
-RUN corepack enable
-COPY web/package.json web/pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+COPY web/package.json web/package-lock.json ./
+RUN npm ci
 COPY web/ .
 ARG NEXT_PUBLIC_API_URL=https://api.compilore.pl
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
-RUN pnpm build
+RUN npm run build
 
 FROM node:20-alpine AS runner
 WORKDIR /app
