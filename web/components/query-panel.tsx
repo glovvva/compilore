@@ -22,7 +22,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-const COMPILORE_API_BASE = "http://localhost:8001";
+const COMPILORE_API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001';
 
 const PAGE_GROUPS: { type: WikiPageType; label: string }[] = [
   { type: "concept", label: "Concepts" },

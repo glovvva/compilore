@@ -17,7 +17,7 @@ export interface CompileLogLine {
   gitHash?: string;
 }
 
-const COMPILORE_API_BASE = "http://localhost:8001";
+const COMPILORE_API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001';
 
 interface QueryResponseCardJson {
   format?: string;
