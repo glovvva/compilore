@@ -985,7 +985,7 @@ export function QueryPanel({ children }: QueryPanelProps) {
               </button>
               <div className="rounded-md border border-border p-3">
                 <div className="text-[10px] uppercase text-muted-foreground">Last compile</div>
-                <div className="text-xs leading-snug">{lastCompile}</div>
+                <div className="text-xs leading-snug" suppressHydrationWarning>{lastCompile}</div>
               </div>
               <div className="rounded-md border border-border p-3">
                 <div className="text-[10px] uppercase text-muted-foreground">Cost (month)</div>
