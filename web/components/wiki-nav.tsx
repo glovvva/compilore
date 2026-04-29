@@ -1,8 +1,7 @@
 "use client";
 
 import * as React from "react";
-import type { PanelImperativeHandle } from "react-resizable-panels";
-import { BookMarked, Brain, ChevronLeft, FileText, Plus, Sparkles, User } from "lucide-react";
+import { BookMarked, Brain, FileText, Plus, Sparkles, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -64,13 +63,12 @@ function pageTypeIcon(t: WikiPageType) {
 export interface WikiNavProps {
   onPageSelect: (page: WikiPage) => void;
   selectedSlug?: string;
-  panelRef: React.RefObject<PanelImperativeHandle | null>;
 }
 
 /**
  * Live wiki graph from `/api/wiki/pages` for the **ingest/compile** loop; drives inspector selection.
  */
-export function WikiNav({ onPageSelect, selectedSlug, panelRef }: WikiNavProps) {
+export function WikiNav({ onPageSelect, selectedSlug }: WikiNavProps) {
   const { pages, isLoading, error } = useWikiPages();
   const { setIngestOpen } = useWorkspace();
   const [q, setQ] = React.useState("");
@@ -108,18 +106,8 @@ export function WikiNav({ onPageSelect, selectedSlug, panelRef }: WikiNavProps) 
 
   return (
     <div className="flex h-full min-h-0 flex-col border-r border-border bg-surface">
-      <div className="flex items-center justify-between border-b border-border px-2 py-2">
+      <div className="flex items-center border-b border-border px-2 py-2">
         <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Wiki</span>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          className="size-7"
-          aria-label="Collapse wiki panel"
-          onClick={() => panelRef.current?.collapse()}
-        >
-          <ChevronLeft className="size-4" />
-        </Button>
       </div>
       <div className="p-2">
         <Input
