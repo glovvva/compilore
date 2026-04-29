@@ -26,7 +26,7 @@ export function WorkspaceShell({ children }: { children?: React.ReactNode }) {
       <Group
         orientation="horizontal"
         className="min-h-0 flex-1"
-        defaultLayout={[25, 50, 25]}
+        defaultLayout={{ "wiki-nav": 25, "main": 50, "inspector": 25 }}
       >
         <Panel
           id="wiki-nav"
