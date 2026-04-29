@@ -105,7 +105,7 @@ export function WikiNav({ onPageSelect, selectedSlug }: WikiNavProps) {
   }, [pages]);
 
   return (
-    <div className="flex h-full w-full min-h-0 flex-col border-r border-border bg-surface">
+    <div className="flex h-full w-full flex-1 min-h-0 flex-col border-r border-border bg-surface">
       <div className="flex items-center border-b border-border px-2 py-2">
         <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Wiki</span>
       </div>
@@ -134,8 +134,8 @@ export function WikiNav({ onPageSelect, selectedSlug }: WikiNavProps) {
             >
               <div className="mb-1.5 flex items-center gap-2 px-2 font-mono text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
                 <Icon className="size-3 shrink-0" />
-                {section.label}
-                <span className="rounded border border-border px-1 text-[10px] text-foreground">({count})</span>
+                <span className="shrink-0">{section.label}</span>
+                <span className="shrink-0 rounded border border-border px-1 text-[10px] text-foreground">({count})</span>
               </div>
               {isLoading ? (
                 <ul className="space-y-1 px-1">
