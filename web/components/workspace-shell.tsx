@@ -26,10 +26,8 @@ export function WorkspaceShell({ children }: { children?: React.ReactNode }) {
       <Group
         orientation="horizontal"
         className="min-h-0 flex-1"
-        defaultLayout={{ "wiki-nav": 25, "main": 50, "inspector": 25 }}
       >
         <Panel
-          id="wiki-nav"
           defaultSize={25}
           minSize={25}
           maxSize={45}
@@ -40,14 +38,13 @@ export function WorkspaceShell({ children }: { children?: React.ReactNode }) {
 
         <Separator className="w-2 shrink-0 bg-border" />
 
-        <Panel id="main" minSize={25} className="overflow-hidden">
+        <Panel defaultSize={50} minSize={25} className="overflow-hidden">
           <QueryPanel>{children}</QueryPanel>
         </Panel>
 
         <Separator className="w-2 shrink-0 bg-border" />
 
         <Panel
-          id="inspector"
           defaultSize={25}
           minSize={25}
           maxSize={40}
