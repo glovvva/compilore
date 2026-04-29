@@ -36,6 +36,19 @@ Every `frontmatter` object **must** include at least:
 - `related` (array of strings): wiki slugs using wikilink form, e.g. `"[[other-slug]]"`.
 - `tags` (array of strings): lowercase topics.
 - `context_hierarchy` (string): breadcrumb such as `"Domain > Subdomain > Topic"`.
+- `topic` (string, optional): short topic tag in English, 2-4 words max, derived from content.
+
+Topic examples:
+- `"AI Agents"`
+- `"Polish Real Estate"`
+- `"Industrial Tools"`
+- `"LLM Architecture"`
+
+Topic rules:
+- Use the same topic for closely related pages (e.g. all Kolver pages -> `"Industrial Tools"`).
+- Keep naming consistent across pages in the same knowledge base.
+- Never use the page title as the topic.
+- If a page does not fit any cluster, omit the `topic` field (do not write `"General"`).
 
 Optional keys when relevant: `last_compiled`, extra `sources` entries.
 
