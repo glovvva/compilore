@@ -25,6 +25,7 @@ export async function GET() {
       confidence: Number(row.confidence ?? 0),
       updated_at: row.updated_at as string,
       related: relatedFromFrontmatter(row.frontmatter),
+      frontmatter: (row.frontmatter ?? {}) as Record<string, unknown>,
     }));
 
     return NextResponse.json({ pages });

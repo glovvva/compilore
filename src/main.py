@@ -51,6 +51,7 @@ from src.modules.query.compounding import save_answer_to_wiki
 from src.modules.query.gatekeeper import GatekeeperDecision
 from src.modules.departments.router import departments_router
 from src.api.routers.outputs import outputs_router
+from src.modules.wiki.router import wiki_router
 from src.lib.supabase import create_supabase_client, insert_wiki_log_row
 
 app = FastAPI(
@@ -237,6 +238,7 @@ async def auth_callback() -> HTMLResponse:
 app.mount("/static", StaticFiles(directory=str(_STATIC_DIR)), name="static")
 app.include_router(departments_router, prefix="/departments", tags=["departments"])
 app.include_router(outputs_router, prefix="/generate", tags=["outputs"])
+app.include_router(wiki_router, prefix="/wiki", tags=["wiki"])
 
 
 def _ingest_file_background(
