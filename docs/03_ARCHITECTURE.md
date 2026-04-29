@@ -282,6 +282,34 @@ CREATE TABLE wiki_pages (
 ```
 `department_id = NULL` means tenant-wide visibility. Non-NULL means department-scoped visibility.
 
+### Wiki Page Anatomy (frontmatter template)
+
+```yaml
+title: "Example page title"
+date_created: "2026-04-17"
+type: "concept"
+status: "draft"
+confidence: 0.90
+knowledge_class: explicit_normative
+last_verified: "2026-04-17"
+git_commit_hash: "abc1234"
+sources: []
+related: []
+```
+
+- `confidence` — current confidence score for retrieval/ranking and lint decay workflows.
+- `knowledge_class` — epistemological origin of the page.
+  - `explicit_normative`: Official manufacturer documentation, certified catalog,
+    regulatory text. Authoritative source. 0% additional decay penalty.
+  - `explicit_derived`: AI-compiled synthesis with citation trail. Standard
+    confidence decay applies per page_type rules (D-97).
+  - `empirical_descriptive`: Reserved for ProcessOS Living Playbooks (Phase 3+).
+    Describes actual operational behavior, not normative policy.
+  Lint loop MUST NOT auto-merge conflicts between `explicit_normative` and
+  `explicit_derived` pages. Surface as "Pathology Alert" for human review.
+- `last_verified` — last human verification timestamp used by lint confidence logic.
+- `git_commit_hash` — git revision pointer for rollback/audit traceability.
+
 **document_chunks** — for vector + full-text search
 ```sql
 CREATE TABLE document_chunks (
@@ -418,6 +446,19 @@ Coolify restart policy).
 | Weekly | Lint: orphan links, broken wikilinks (RegEx, $0) | $0 | n8n cron → lint_graph.py |
 | Monthly | Confidence decay (-5%) + semantic dedup (cosine > 0.92 → merge) | ~$2–5/tenant | n8n cron → confidence_decay.py |
 | Quarterly | Full audit vs source truth + human review of stale pages | ~$10–20/tenant | Manual trigger |
+
+### Confidence Decay System
+
+| Event | Effect |
+|---|---|
+| Monthly decay tick (default behavior) | -0.05 confidence per month |
+| Human verification (`last_verified` updated) | Reset decay clock for the verified page |
+| page_type = concept + source_type = manufacturer_catalog | 0% decay (D-97) |
+| page_type = index | 0% decay (D-97) |
+| page_type = source_summary | -0.02 per month (D-97) |
+
+Decay rates are page_type-aware per D-97. Flat -5%/month is NOT applied to
+engineering catalog pages — physical constants do not rot.
 
 ---
 

@@ -1,0 +1,18 @@
+{
+  "errors": {
+    "not_found": "Nie znaleziono zasobu",
+    "unauthorized": "Brak autoryzacji",
+    "compile_failed": "Kompilacja nie powiodła się",
+    "search_failed": "Wyszukiwanie nie powiodło się"
+  },
+  "gatekeeper": {
+    "saved": "Odpowiedź zapisana do Wiki",
+    "rejected_novelty": "Wiedza już istnieje w Wiki",
+    "rejected_necessity": "Zbyt specyficzne — nie zapisano",
+    "rejected_grounding": "Brak weryfikowalnych źródeł"
+  },
+  "ingest": {
+    "success": "Dokument zingestionowany i skompilowany",
+    "processing": "Przetwarzanie dokumentu..."
+  }
+}

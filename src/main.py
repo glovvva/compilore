@@ -19,7 +19,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from fastapi import BackgroundTasks, FastAPI, File, Header, HTTPException, UploadFile
+from fastapi import BackgroundTasks, FastAPI, File, Form, Header, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -39,7 +39,8 @@ from src.config.settings import settings
 from src.modules.compile.models import WikiPage
 from src.modules.lint.report_history import fetch_last_lint_report
 from src.lib.response import AIContext, APIResponse, envelop
-from src.lib.auth import get_current_tenant_id
+from src.lib.auth import TenantContext, get_current_tenant_id
+from src.middleware.agent import AgentMiddleware
 from fastapi import Depends
 
 from src.modules.query.format_analytics import log_format_chip_click
@@ -48,6 +49,8 @@ from src.modules.query.output_formatter import transform_answer_to_format
 from src.modules.query.technical_advisor_query import run_technical_advisor_query
 from src.modules.query.compounding import save_answer_to_wiki
 from src.modules.query.gatekeeper import GatekeeperDecision
+from src.modules.departments.router import departments_router
+from src.api.routers.outputs import outputs_router
 from src.lib.supabase import create_supabase_client, insert_wiki_log_row
 
 app = FastAPI(
@@ -64,11 +67,18 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(AgentMiddleware)
 
 
 @app.middleware("http")
 async def inject_json_processing_time_ms(request: Request, call_next):
     """Measure request handling with ``perf_counter``; set ``meta.processing_time_ms`` on JSON bodies."""
+    raw_lang = request.headers.get("Accept-Language") or "pl"
+    locale = raw_lang[:2].lower()
+    if locale not in ("pl", "en"):
+        locale = "pl"
+    request.state.locale = locale
+
     start = time.perf_counter()
     response = await call_next(request)
     elapsed_ms = round((time.perf_counter() - start) * 1000, 3)
@@ -196,7 +206,7 @@ class AdminSetPasswordRequest(BaseModel):
 @app.get("/health", response_model=APIResponse[HealthResponse])
 def health() -> APIResponse[HealthResponse]:
     """Liveness probe; no dependency checks in Phase 0 scaffold."""
-    return envelop(HealthResponse(status="ok"))
+    return envelop(HealthResponse(status="ok"), available_actions=["query", "ingest", "lint"])
 
 
 @app.get("/")
@@ -225,15 +235,23 @@ async def auth_callback() -> HTMLResponse:
 
 
 app.mount("/static", StaticFiles(directory=str(_STATIC_DIR)), name="static")
+app.include_router(departments_router, prefix="/departments", tags=["departments"])
+app.include_router(outputs_router, prefix="/generate", tags=["outputs"])
 
 
-def _ingest_file_background(tmp_path: Path, original_filename: str, tenant_id: str) -> None:
+def _ingest_file_background(
+    tmp_path: Path,
+    original_filename: str,
+    tenant_id: str,
+    authority_tier: int,
+) -> None:
     """Run file ingest after HTTP response (BackgroundTasks). Cleans up temp file on exit."""
     try:
         pages, err = run_ingest_compile(
             temp_path=tmp_path,
             original_filename=original_filename,
             tenant_id=tenant_id,
+            authority_tier=authority_tier,
         )
         if err:
             _logger.error("File ingest failed for %r: %s", original_filename, err)
@@ -249,9 +267,14 @@ def _ingest_file_background(tmp_path: Path, original_filename: str, tenant_id: s
 async def ingest_document(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
-    tenant_id: str = Depends(get_current_tenant_id),
+    authority_tier: int = Form(default=3, ge=1, le=4),
+    tenant: TenantContext = Depends(get_current_tenant_id),
 ) -> APIResponse[dict[str, Any]]:
-    """Upload Markdown, plain text, or native-digital PDF; returns immediately, processes in background."""
+    """Upload Markdown, plain text, or native-digital PDF for the Compile loop.
+
+    ``authority_tier`` is scaffolded for future retrieval weighting:
+    1=primary/official, 2=internal/approved, 3=informal, 4=third-party.
+    """
     filename = file.filename or "upload"
     suffix = Path(filename).suffix.lower()
     if suffix not in _ALLOWED_UPLOAD_SUFFIXES:
@@ -267,16 +290,21 @@ async def ingest_document(
     tmp.flush()
     tmp.close()
 
-    background_tasks.add_task(_ingest_file_background, tmp_path, filename, tenant_id)
-    return envelop({"status": "accepted", "filename": filename})
+    tenant_id = tenant["tenant_id"]
+    background_tasks.add_task(_ingest_file_background, tmp_path, filename, tenant_id, authority_tier)
+    return envelop(
+        {"status": "accepted", "filename": filename, "authority_tier": authority_tier},
+        available_actions=["query", "lint", "ingest"],
+    )
 
 
 @app.post("/ingest/url", response_model=APIResponse[list[WikiPage]])
 async def ingest_url(
     body: IngestUrlRequest,
-    tenant_id: str = Depends(get_current_tenant_id),
+    tenant: TenantContext = Depends(get_current_tenant_id),
 ) -> APIResponse[list[WikiPage]]:
     """Ingest a web article by URL (trafilatura); same compile graph as file upload."""
+    tenant_id = tenant["tenant_id"]
     pages, err = await run_in_threadpool(
         run_ingest_compile_from_url,
         url=str(body.url),
@@ -284,7 +312,7 @@ async def ingest_url(
     )
     if err:
         raise HTTPException(status_code=502, detail=err)
-    return envelop(pages)
+    return envelop(pages, available_actions=["query", "lint", "ingest"])
 
 
 def _ingest_paste_background(content: str, title: str, tenant_id: str) -> None:
@@ -304,7 +332,7 @@ def _ingest_paste_background(content: str, title: str, tenant_id: str) -> None:
 async def ingest_paste(
     body: IngestPasteRequest,
     background_tasks: BackgroundTasks,
-    tenant_id: str = Depends(get_current_tenant_id),
+    tenant: TenantContext = Depends(get_current_tenant_id),
 ) -> APIResponse[dict[str, Any]]:
     """
     Ingest raw pasted text directly.
@@ -323,41 +351,53 @@ async def ingest_paste(
     doc = paste_to_ingest_result(content=content, title=title)
     word_count = int(doc.frontmatter.get("word_count") or 0)
 
+    tenant_id = tenant["tenant_id"]
     background_tasks.add_task(_ingest_paste_background, content, title, tenant_id)
     payload: dict[str, Any] = {
         "status": "queued",
         "title": doc.display_title(),
         "word_count": word_count,
     }
-    return envelop(payload)
+    return envelop(payload, available_actions=["query", "lint", "ingest"])
 
 
 @app.post("/query", response_model=APIResponse[QueryResponseCard])
 async def query_wiki(
     body: QueryRequest,
-    tenant_id: str = Depends(get_current_tenant_id),
+    tenant: TenantContext = Depends(get_current_tenant_id),
 ) -> APIResponse[QueryResponseCard]:
     """Ask a question against the compiled Wiki; returns F-pattern ``response_card`` JSON."""
+    tenant_id = tenant["tenant_id"]
     if settings.TECHNICAL_ADVISOR_MODE:
         result = await run_technical_advisor_query(body.question, tenant_id)
         err = None
     else:
-        result, err = await run_in_threadpool(run_query, body.question, tenant_id)
+        result, err = await run_in_threadpool(
+            run_query,
+            body.question,
+            tenant_id,
+            tenant.get("department_id"),
+        )
     if err or result is None:
         raise HTTPException(status_code=502, detail=err or "Query produced no result")
     ai = AIContext(
         ai_generated=True,
         cost_usd=result.cost_usd,
     )
-    return envelop(result, ai_context=ai)
+    return envelop(
+        result,
+        ai_context=ai,
+        available_actions=["save_to_wiki", "generate_proposal", "query"],
+    )
 
 
 @app.post("/query/save", response_model=APIResponse[dict[str, Any]])
 async def query_save(
     body: QuerySaveRequest,
-    tenant_id: str = Depends(get_current_tenant_id),
+    tenant: TenantContext = Depends(get_current_tenant_id),
 ) -> APIResponse[dict[str, Any]]:
     """Manually persist a query answer to the Wiki without changing auto-save flow."""
+    tenant_id = tenant["tenant_id"]
     try:
         slug = f"output-{hashlib.sha256(body.question.strip().encode('utf-8')).hexdigest()[:16]}"
         client = create_supabase_client()
@@ -371,7 +411,10 @@ async def query_save(
         )
         rows = getattr(existing, "data", None) or []
         if rows:
-            return envelop({"saved": False, "reason": "already_exists", "slug": slug})
+            return envelop(
+                {"saved": False, "reason": "already_exists", "slug": slug},
+                available_actions=["query", "save_to_wiki", "generate_proposal"],
+            )
 
         answer = SynthesisResult(
             answer_markdown=body.answer_markdown,
@@ -399,7 +442,10 @@ async def query_save(
             cost_usd=float(body.query_cost_usd),
             module="query_save_endpoint",
         )
-        return envelop({"saved": True, "slug": new_slug})
+        return envelop(
+            {"saved": True, "slug": new_slug},
+            available_actions=["query", "save_to_wiki", "generate_proposal"],
+        )
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Manual save failed: {exc}") from exc
 
@@ -419,15 +465,21 @@ async def query_format(body: QueryFormatRequest) -> APIResponse[dict[str, Any]]:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
-    return envelop(out, ai_context=AIContext(ai_generated=True))
+    return envelop(
+        out,
+        ai_context=AIContext(ai_generated=True),
+        available_actions=["download", "query", "generate_proposal"],
+    )
 
 
 @app.post("/query/format_click", response_model=APIResponse[dict[str, bool]])
 async def query_format_click(
     body: FormatClickRequest,
-    tenant_id: str = Depends(get_current_tenant_id),
+    tenant: TenantContext = Depends(get_current_tenant_id),
 ) -> APIResponse[dict[str, bool]]:
     """Log format chip interaction to ``wiki_log``."""
+
+    tenant_id = tenant["tenant_id"]
 
     def _do() -> None:
         log_format_chip_click(
@@ -438,7 +490,7 @@ async def query_format_click(
         )
 
     await run_in_threadpool(_do)
-    return envelop({"logged": True})
+    return envelop({"logged": True}, available_actions=["query", "save_to_wiki"])
 
 
 @app.post("/admin/set-password")
@@ -502,11 +554,12 @@ async def admin_set_password(body: AdminSetPasswordRequest) -> dict[str, Any]:
 
 @app.post("/lint/run", response_model=APIResponse[dict[str, Any]])
 async def lint_run(
-    tenant_id: str = Depends(get_current_tenant_id),
+    tenant: TenantContext = Depends(get_current_tenant_id),
 ) -> APIResponse[dict[str, Any]]:
     """Run full lint (orphans, stale, duplicates, contradictions pass 1–2); may pause for HITL."""
+    tenant_id = tenant["tenant_id"]
     report = await run_in_threadpool(run_lint, tenant_id)
-    return envelop(report.to_dict())
+    return envelop(report.to_dict(), available_actions=["query", "lint", "ingest"])
 
 
 @app.post("/lint/resolve", response_model=APIResponse[dict[str, Any]])
@@ -516,7 +569,7 @@ async def lint_resolve(body: LintResolveRequest) -> APIResponse[dict[str, Any]]:
         report = await run_in_threadpool(resume_lint, body.thread_id, body.decisions)
     except RuntimeError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
-    return envelop(report.to_dict())
+    return envelop(report.to_dict(), available_actions=["query", "lint", "ingest"])
 
 
 @app.post("/lint/decay", response_model=APIResponse[dict[str, Any]])
@@ -536,18 +589,19 @@ async def lint_decay(
     if not tenant_id:
         raise HTTPException(status_code=500, detail="COMPILORE_DEFAULT_TENANT_ID not configured.")
     decay_report = await run_in_threadpool(run_decay, tenant_id)
-    return envelop(decay_report.to_dict())
+    return envelop(decay_report.to_dict(), available_actions=["query", "lint", "ingest"])
 
 
 @app.get("/lint/status", response_model=APIResponse[dict[str, Any]])
 async def lint_status(
-    tenant_id: str = Depends(get_current_tenant_id),
+    tenant: TenantContext = Depends(get_current_tenant_id),
 ) -> APIResponse[dict[str, Any]]:
     """Latest persisted lint report from ``wiki_log`` for the current tenant."""
+    tenant_id = tenant["tenant_id"]
     row = await run_in_threadpool(fetch_last_lint_report, tenant_id)
     if row is None:
         raise HTTPException(
             status_code=404,
             detail="No lint_run found in wiki_log for this tenant.",
         )
-    return envelop(row)
+    return envelop(row, available_actions=["query", "lint", "ingest"])

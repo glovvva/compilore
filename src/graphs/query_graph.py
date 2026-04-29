@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import uuid
 from decimal import Decimal
 from typing import Any, Optional, TypedDict
@@ -30,6 +31,7 @@ class QueryGraphState(TypedDict, total=False):
     question: str
     requested_format: Optional[str]
     tenant_id: str
+    department_id: Optional[str]
     query_embedding: list[float]
     chunks: list[dict[str, Any]]
     synthesis: dict[str, Any]
@@ -69,11 +71,15 @@ def node_hybrid_search(state: QueryGraphState) -> dict[str, Any]:
     if state.get("error"):
         return {}
     try:
-        found = hybrid_search(
-            state["question"],
-            state["tenant_id"],
-            match_count=10,
-            query_embedding=state.get("query_embedding"),
+        found = asyncio.run(
+            hybrid_search(
+                state["question"],
+                state["tenant_id"],
+                match_count=10,
+                scope="tenant",
+                department_id=state.get("department_id"),
+                query_embedding=state.get("query_embedding"),
+            )
         )
     except Exception as exc:
         return {"error": f"Hybrid search failed: {exc}"}
@@ -263,7 +269,11 @@ def build_query_graph() -> Any:
     return builder.compile(checkpointer=MemorySaver())
 
 
-def run_query(question: str, tenant_id: str) -> tuple[Optional[QueryResponseCard], Optional[str]]:
+def run_query(
+    question: str,
+    tenant_id: str,
+    department_id: Optional[str] = None,
+) -> tuple[Optional[QueryResponseCard], Optional[str]]:
     """Run the query graph; return ``(response card, error_message)``."""
     graph = build_query_graph()
     tid = (tenant_id or "").strip() or _default_tenant_id()
@@ -272,6 +282,7 @@ def run_query(question: str, tenant_id: str) -> tuple[Optional[QueryResponseCard
         {
             "original_question": question.strip(),
             "tenant_id": tid,
+            "department_id": department_id,
             "error": None,
         },
         config={"configurable": {"thread_id": thread_id}},

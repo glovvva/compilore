@@ -1,8 +1,7 @@
 "use client";
 
 import * as React from "react";
-import type { PanelImperativeHandle } from "react-resizable-panels";
-import { ChevronRight, ChevronDown } from "lucide-react";
+import { ChevronDown, ChevronRight, X } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -11,13 +10,10 @@ import { useWikiPageDetail } from "@/hooks/use-wiki-page-detail";
 import { confidenceBarClass } from "@/lib/wiki/confidence-dot";
 
 export interface InspectorPanelProps {
-  panelRef: React.RefObject<PanelImperativeHandle | null>;
+  onClose: () => void;
 }
 
-/**
- * Inspector loads `content_markdown` via `/api/wiki/pages/[slug]` after **nav** or **query** selection.
- */
-export function InspectorPanel({ panelRef }: InspectorPanelProps) {
+export function InspectorPanel({ onClose }: InspectorPanelProps) {
   const { selectedWikiPage, openPageBySlug, inspectorSourceCitation } = useWorkspace();
   const slug = selectedWikiPage?.slug ?? null;
   const { page: detail, isLoading, error } = useWikiPageDetail(slug);
@@ -33,18 +29,18 @@ export function InspectorPanel({ panelRef }: InspectorPanelProps) {
   }, [detail?.content_markdown]);
 
   return (
-    <div className="flex h-full w-full min-h-0 flex-col border-l border-border bg-surface">
-      <div className="flex items-center justify-between border-b border-border px-2 py-2">
-        <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+    <aside className="fixed right-0 top-10 z-20 flex h-[calc(100dvh-2.5rem)] w-80 flex-col border-l border-border bg-surface">
+      <div className="flex h-10 shrink-0 items-center justify-between border-b border-border px-3">
+        <span className="font-mono text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
           Inspector
         </span>
         <button
           type="button"
-          className="flex size-7 items-center justify-center rounded-md border border-transparent text-muted-foreground transition-[border-color,background-color] duration-200 ease-out hover:border-border hover:bg-background focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--accent)]"
-          aria-label="Collapse inspector"
-          onClick={() => panelRef.current?.collapse()}
+          className="flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-background hover:text-foreground"
+          aria-label="Close inspector"
+          onClick={onClose}
         >
-          <ChevronRight className="size-4" />
+          <X className="size-4" />
         </button>
       </div>
 
@@ -88,7 +84,9 @@ export function InspectorPanel({ panelRef }: InspectorPanelProps) {
               </button>
             )}
 
-            <h1 className="font-serif text-2xl font-normal leading-tight text-foreground">{displayTitle}</h1>
+            <h1 className="font-serif text-2xl font-normal leading-tight text-foreground">
+              {displayTitle}
+            </h1>
             <p className="mt-1 font-mono text-[11px] text-muted-foreground">{displaySlug}</p>
 
             <div className="mt-4">
@@ -106,7 +104,11 @@ export function InspectorPanel({ panelRef }: InspectorPanelProps) {
 
             <Collapsible open={fmOpen} onOpenChange={setFmOpen} className="mt-4">
               <CollapsibleTrigger className="flex w-full items-center gap-1 rounded-md border border-border bg-background px-2 py-1.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground transition-[border-color] duration-200 ease-out hover:border-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--accent)]">
-                {fmOpen ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}
+                {fmOpen ? (
+                  <ChevronDown className="size-3" />
+                ) : (
+                  <ChevronRight className="size-3" />
+                )}
                 Frontmatter
               </CollapsibleTrigger>
               <CollapsibleContent className="mt-2 rounded-md border border-border bg-background p-2">
@@ -163,7 +165,9 @@ export function InspectorPanel({ panelRef }: InspectorPanelProps) {
                     strong: ({ children }) => (
                       <strong className="font-sans font-semibold">{children}</strong>
                     ),
-                    em: ({ children }) => <em className="text-muted-foreground">{children}</em>,
+                    em: ({ children }) => (
+                      <em className="text-muted-foreground">{children}</em>
+                    ),
                   }}
                 >
                   {normalizedBodyMarkdown}
@@ -177,6 +181,6 @@ export function InspectorPanel({ panelRef }: InspectorPanelProps) {
           <p className="font-mono text-xs text-muted-foreground">Page not found.</p>
         )}
       </div>
-    </div>
+    </aside>
   );
 }

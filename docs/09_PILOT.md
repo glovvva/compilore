@@ -50,8 +50,16 @@ testing behavior). The pilot must be smooth, well-documented, and closely monito
 - Citation accuracy: does the answer point to the right page in the right document?
 - Answer quality: would Wojtek send this answer to a client as-is? (Y/N)
 
-**Success gate:** 3/3 test questions answered correctly with valid citations.
-**Fail signal:** Any hallucinated specification (wrong torque value, wrong model number).
+**Success gate (two criteria, both required):**
+1. **TTFV gate:** Wojtek achieves "wow moment" on Day 1 — complex query
+   answered correctly with citation in <5 minutes of first login.
+2. **Accuracy gate:** 3/3 test questions answered correctly with valid
+   citations (existing criterion).
+
+**Fail signals:**
+- System is empty on Day 1 (pre-load not completed = Bartek's failure)
+- Any hallucinated specification (wrong torque value, wrong model number)
+- Wojtek cannot find answer to a question he knows the answer to
 
 ---
 
@@ -66,7 +74,7 @@ testing behavior). The pilot must be smooth, well-documented, and closely monito
   - "Compare KOLVER and CLECO for ESD-safe assembly — what are the differences?"
   - "Which of our tools are certified to ISO 6789-2?"
   - [2 more from Wojtek's real daily queries]
-  - **Audit-readiness stress test:** "Stellantis zgłosił żądanie audytowe na jutro. W <15 minut przygotuj pakiet dla Stacji 4: (a) aktualny certyfikat kalibracji dla narzędzia SN:[X], (b) PFMEA dla tej stacji, (c) ostatnich 100 zapisów programów dokręcania, (d) matryca compliance IATF 16949 clause 7.5.3.2.1 retention." This validates whether Compilore can serve as audit-deadline insurance — a potential future repositioning (see D-85, DR-14 RESULTS in 08_RESEARCH.md).
+  - **Audit-readiness stress test:** "Stellantis zgłosił żądanie audytowe na jutro. W <15 minut przygotuj pakiet dla Stacji 4: (a) aktualny certyfikat kalibracji dla narzędzia SN:[X], (b) PFMEA dla tej stacji, (c) ostatnich 100 zapisów programów dokręcania, (d) matryca compliance IATF 16949 clause 7.5.3.2.1 retention." This validates whether Compilore can serve as audit-deadline insurance — a potential future repositioning (see D-95, DR-14 RESULTS in 08_RESEARCH.md).
 
 **We measure:**
 - Cross-document retrieval accuracy
@@ -98,6 +106,26 @@ testing behavior). The pilot must be smooth, well-documented, and closely monito
 
 ---
 
+### CHURN TELEMETRY: Behavioral Signals by Week
+
+Based on DR-19 SaaS retention benchmarks. These are automatic intervention
+triggers — if signal detected, act within 24 hours.
+
+| Week | Signal | Threshold | Intervention |
+|---|---|---|---|
+| Week 2 | No new documents uploaded by Wojtek independently | 0 uploads after Day 1 pre-load | Call Wojtek, offer to help upload next manufacturer folder together |
+| Week 2 | No complex queries executed | <3 queries total in first 14 days | Live demo session — Bartek runs a query using Wojtek's own data |
+| Week 2 | Only basic single-keyword queries | All queries <5 words | Show Wojtek the 3 cross-manufacturer query examples from Week 3-4 plan |
+| Week 6 | No team members invited | Wojtek still only user | Email to Wojtek with one-click invite template for his colleagues |
+| Week 6 | Query volume declining week-over-week | W5 < W4 < W3 | Proactive call with Wojtek + his manager — review accuracy, ask what's missing |
+| Week 6 | DAU/MAU < 0.3 | Wojtek using <2 days/week | Schedule 30-min session to add next manufacturer batch |
+
+**Critical threshold:** If by Day 14 Wojtek has not independently uploaded
+at least one document and asked at least one question unprompted, the pilot
+is at high churn risk. Intervene immediately.
+
+---
+
 ### Week 7–8: Real Usage — "Would you pay for this?"
 **Goal:** Wojtek uses Compilore in real daily work, without structured prompts from us.
 
@@ -122,6 +150,12 @@ testing behavior). The pilot must be smooth, well-documented, and closely monito
 
 ### Before first login
 **Prerequisites checklist (Bartek, before Wojtek's login):**
+- [ ] Pre-load KOLVER full catalog + HAZET full catalog into hermes-pilot
+      org BEFORE Wojtek's first login. System must not be empty on Day 1.
+      Goal: Wojtek logs in, asks one question, gets answer with citation
+      in <5 minutes. TTFV target = Day 1, not Day 3.
+      Rationale: DR-19 — 90% of users who don't see value in week 1 churn.
+      Every additional minute of onboarding = -3% trial-to-paid conversion.
 - [ ] Domain/SSL configured and working (blocked — separate issue)
 - [x] Wojtek's Supabase Auth account created 
       (wojtek-igi@wp.pl, id: c79b66ea-b564-4332-8fa5-46693e2d675e)
@@ -153,7 +187,7 @@ Do NOT upload everything at once. Start small, verify quality, then expand.
 
 ### Questions to surface during normal feedback calls (NOT separate interview)
 
-Weave these into weekly 15-min feedback calls organically. Do not batch. Do not treat as questionnaire. Each question informs decisions currently deferred (D-85, D-86, 10_GRANTS.md Option D activation).
+Weave these into weekly 15-min feedback calls organically. Do not batch. Do not treat as questionnaire. Each question informs decisions currently deferred (D-95, D-96, 10_GRANTS.md Option D activation).
 
 **Week 2-3 (establishing baseline):**
 - What % of your daily time goes to catalog search vs calibration/service coordination vs client engineering support?

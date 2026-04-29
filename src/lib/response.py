@@ -31,8 +31,11 @@ class AIContext(BaseModel):
 class APIResponse(BaseModel, Generic[T]):
     """Standard API payload wrapper."""
 
-    data: T
+    success: bool = True
+    data: Optional[T] = None
+    error: Optional[str] = None
     meta: ResponseMeta = Field(default_factory=ResponseMeta)
+    available_actions: list[str] = Field(default_factory=list)
     ai_context: Optional[AIContext] = None
 
 
@@ -41,10 +44,17 @@ def envelop(
     *,
     processing_time_ms: Optional[float] = None,
     ai_context: Optional[AIContext] = None,
+    available_actions: Optional[list[str]] = None,
+    success: bool = True,
+    error: Optional[str] = None,
 ) -> APIResponse[T]:
-    """Build an :class:`APIResponse` with optional timing and AI metadata."""
+    """Build an :class:`APIResponse` with optional timing, AI metadata, and agent hints."""
+    actions = list(available_actions) if available_actions is not None else []
     return APIResponse(
+        success=success,
         data=data,
+        error=error,
         meta=ResponseMeta(processing_time_ms=processing_time_ms),
+        available_actions=actions,
         ai_context=ai_context,
     )

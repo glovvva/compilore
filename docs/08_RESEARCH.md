@@ -4,7 +4,323 @@
 **This is a living document.** Each Deep Research session adds a new dated section.
 Findings here directly inform decisions logged in 04_DECISIONS.md.
 
-**Last updated:** 2026-04-19
+**Last updated:** 2026-04-27
+
+---
+
+## DR-15 RESULTS: EU AI Act as Compilore Buying Trigger (2026-04-22)
+
+**Source:** Gemini Deep Research — "EU AI Act Compliance as a Software Buying Trigger for Polish Professional Services"  
+**Verification status:** High. Primary sources cited: EUR-Lex Regulation 2024/1689, artificialintelligenceact.eu, PARP program documentation, EY/PwC Polish market reports.
+
+### Hallucination Guard — corrections to previous claims
+
+| Previous claim | Verdict | Correction |
+|---|---|---|
+| "AI Act fines up to €750,000" | REFUTED — applies to EU institutions only (Art. 100) | Private firms: up to €15M or 3% global turnover for high-risk non-compliance |
+| "Whistleblower tool enables unannounced audits" | PARTIALLY CONFIRMED | Art. 74 grants surveillance authorities unannounced inspection rights. Whistleblower Tool exists but is separate mechanism |
+| "Third-party conformity assessments mandatory before placement" | PARTIALLY CONFIRMED | Mandatory only if harmonized standards not applied, or for Annex I product safety components. Annex III (employment, legal) = internal control pathway permitted |
+| "AI Act obligations extend to firms 'advising on' AI" | REFUTED | Pure advisory = outside scope. Firms that supply components or integrate code = reclassified as provider under Art. 25 |
+
+### Enforcement Timeline (verified)
+- February 2, 2025: prohibited AI practices + AI literacy obligations enforceable
+- August 2, 2025: GPAI rules, penalty frameworks, governance structures enforceable
+- August 2, 2026: HIGH-RISK AI (Annex III) fully enforceable — the critical deadline for our ICP
+- August 2, 2027: Article 6(1) safety components (Annex I products)
+
+### Polish Regulatory Architecture
+- New regulator: KRiBSI (Commission for Development and Safety of AI) — centralized, sweeping enforcement powers
+- Dual oversight: KRiBSI (technical AI compliance) + UODO (data privacy aspects) — creates complexity for Polish firms
+- KRiBSI has authority to impose turnover-based fines on private operators
+
+### "Provider Trap" — Art. 25 (key sales insight)
+Polish IT consultancies that white-label models, fine-tune on client data, or substantially modify API outputs are legally reclassified from "deployer" to "provider" under Art. 25. Provider obligations = full Annex IV technical documentation + conformity assessment + post-market monitoring. Most Polish consultancies are unaware of this reclassification. This is the primary selling trigger for the IT consultancy ICP.
+
+### Documentation burden (Art. 11, Annex IV — verified)
+Providers must maintain before market placement and keep continuously updated:
+- System architecture description (logic, algorithms, design rationale)
+- Data governance documentation (training data provenance, labeling, outlier detection)
+- Validation and testing procedures with metrics (accuracy, robustness, bias assessment)
+- Dated and signed test logs
+- Post-market monitoring plan (Art. 72)
+- Operational logs retained minimum 6 months (Art. 26, deployers)
+
+### "Computational Audit Bundle" — industry term for Annex IV package
+Industry practitioners use this term for the exportable package of: system architecture + data provenance + validation metrics + version-controlled logs. This is what must be producible on demand for KRiBSI inspection. Compilore's citation trail + git_commit_hash + Wiki audit history = structural implementation of this requirement.
+
+### Cost of compliance without tooling (CEPS estimates)
+- Annual compliance cost per high-risk AI system: ~€52,000
+- Initial QMS setup for 30-100 person consultancy: €193,000-330,000
+- Annual maintenance: ~€71,400
+- Per conformity assessment: €5,000-50,000 (manual documentation prep = 40% of cost)
+
+### Polish market data
+- Only 5.9% of Polish firms used AI entering 2024 (second lowest in EU) — but rapidly accelerating
+- 58% of Polish organizations have already initiated AI Act compliance processes (EY 2025)
+- 44% already using AI agents in some capacity (PwC 2025)
+
+### PARP Ścieżka SMART — re-evaluation for IT/consulting segment
+Previous decision D-85 rejected Ścieżka SMART for HermesTools (PKD Sekcja G). DR-15 reveals: PARP has allocated 1.3 billion PLN under FENG 1.1 for AI adoption, co-financing up to 75% for micro/small firms, 50% for medium. Intake: February-May 2026. Eligible sectors include Sekcja J (IT) and Sekcja M (consultancy) — i.e. the IT consultancy ICP. This creates a viable grant-subsidized sales path for the second ICP. Does NOT change D-85 for HermesTools specifically.
+
+### Competitive landscape
+- Vanta/Drata/Secureframe: checklist overlay, no runtime model observability, no RAG integration
+- Enzai/eyreACT: AI-native but no Polish localization, targeting enterprise
+- Productive24: audit trail + versioning but BPA tool, not RAG knowledge management
+- Gap confirmed: no platform combines RAG retrieval + citation trail + Annex IV export for Polish SME professional services
+
+### Strategic synthesis
+AI Act creates a genuine, time-bounded buying trigger with hard August 2026 deadline. Commercial opportunity window: Q2-Q3 2026. PARP grant applications must be built Q1 2026. Compilore's citation-hard architecture + git_commit_hash versioning + audit history = structural implementation of Art. 12 (log-keeping) and Art. 14 (human oversight) requirements. This positions Compilore not as productivity tool but as regulatory compliance infrastructure.
+
+---
+
+## DR-16 RESULTS: AI Act Content Portal Feasibility (2026-04-22)
+
+**Source:** Gemini Deep Research — "Polish B2B AI Compliance Content Portal Feasibility Study"  
+**Verification status:** High. Primary sources verified: gov.pl, pti.org.pl, ey.com/pl_pl, uodo.gov.pl, gdpr.pl, techspresso.cafe.
+
+### Polish AI Act information landscape — confirmed gaps
+
+Current sources mapped:
+- EY Polska: C-level legal overviews, no engineering guidance
+- PTI AWSI: High depth, IT-professional focused, limited reach
+- UODO: GDPR×AI Act intersection, regulatory language
+- Techspresso.cafe: Journalistic, zero implementation guidance
+- Ministerstwo Cyfryzacji: Official announcements only
+- GDPR.pl (Omni Modo): High depth, compliance professionals
+- PARP: SME-focused but basic
+
+**Confirmed white space:** Zero Polish-language resources providing practical, engineering-centric AI Act compliance guidance for CTO of 20-100 person software house. Art. 25 Provider Trap covered by ONE article (EY Law, Sept 2025) focused on public procurement — not commercial software houses.
+
+### SEO opportunity
+- "Art 25 AI Act re-klasyfikacja dostawcy" — Very Low competition. Massive opportunity.
+- "Kary AI Act Polska" — Medium competition. Interactive calculator angle.
+- "Wymogi bezpieczeństwa AI Act NIS2" — Low competition.
+- Programmatic SEO viable: Annex III category × Polish industry sector × compliance requirement matrix.
+
+### GDPR.pl (Omni Modo) as blueprint
+Survived post-enforcement cliff via: pivot to operational tools, DPO training certification, white-label compliance templates for law firms, retainer model for ongoing monitoring. This is the mandatory pivot plan for any AI Act portal.
+
+### Content format recommendations
+- Weekly digest (not daily) — regulatory cadence insufficient for daily content without dilution
+- Interactive formats: risk classification decision tree, fine calculator, Art. 25 self-assessment
+- AI-bot-optimized structure (entity-based, citable) — AI Overviews already dominant
+
+### Agentic pipeline sources confirmed
+- EUR-Lex: ELI system + CELEX 32024R1689 + RSS via "Mój EUR-Lex" dashboard ✓
+- Ministerstwo Cyfryzacji: BIP + Dane.gov.pl + public consultation boards (scraper needed) ✓
+- UODO: uodo.gov.pl — bi-weekly/monthly AI-relevant guidance ✓
+- KRiBSI: Not yet operational (est. 2026). Route via MC until independent domain. ✓
+- Frequency: Weekly digest feasible. Daily = content dilution risk.
+
+### Lead gen funnel (validated from KSeF/RODO precedents)
+Stage 1: Awareness (free calculator/checklist) → Stage 2: Education (gated guide) → Stage 3: Demo request (3-6 month cycle) → Stage 4: PoC → Stage 5: Contract
+
+### Build-in-Public caveat
+Polish B2B compliance buyers require institutional authority signals. Build-in-Public must be paired with visible expert partnerships (PTI certified auditor, named legal partner) to offset startup perception risk.
+
+---
+
+## DR-18 RESULTS: Strategic Viability and Go-To-Market Conditions (2026-04-22)
+
+**Source:** Gemini Deep Research — "Strategic Viability and Go-To-Market Conditions for AI Compliance SaaS in Poland: The Compilore Case"  
+**Verification status:** High for structural analysis. Named Polish SaaS ARR figures flagged where unverified.
+
+### CRITICAL: KRiBSI enforcement capacity — 70 people, 27M PLN budget
+
+This single fact changes the enforcement probability calculation fundamentally. KRiBSI cannot meaningfully audit Polish SME IT sector with 70 staff. Enforcement against SMEs will be indirect — via enterprise client requirements flowing downstream.
+
+### Enforcement probability distribution (Gemini assessment)
+- Scenario A (mass SME fines by Q2 2027): 10%
+- Scenario B (KRiBSI focuses on large enterprises + public sector): 65% — MOST LIKELY
+- Scenario C (further delays mirroring KSeF): 25%
+
+**Strategic implication:** AI Act is NOT a direct fear-of-fine trigger for Polish SME IT. It IS a downstream compliance pressure trigger — enterprise clients requiring their IT vendors to prove AI governance. Same mechanism as Stellantis → Tier 1/2 suppliers. This is the correct sales framing.
+
+### Moat analysis — optimal combination confirmed
+Best defensible position for bootstrapped founder:
+1. Regulatory locale depth (KRiBSI-specific workflows, UODO jurisprudence) — HIGH achievability, LOW cost, HIGH defense vs Vanta/Drata
+2. Switching costs from compiled organizational wiki — HIGH achievability, MODERATE cost, HIGH defense vs all competitors
+3. Grant writer channel distribution (PARP Ścieżka SMART) — MODERATE achievability, HIGH defense vs global GRC
+
+**Weakest moats:** Network effects (need 100s of clients), compliance templates alone (trivially cloned by incumbents).
+
+### Default alive threshold
+- Required MRR: 18,000-22,000 PLN gross
+- Required customers at 1,500 PLN/msc ARPU: 12-15 clients
+- Achievable. Does not require viral growth or VC.
+
+### Polish SaaS ARR benchmarks (honest assessment)
+- NO verified Polish compliance SaaS reached 1M PLN ARR in 24 months bootstrapped
+- Autenti (e-signature): years + VC funding
+- Pergamin (contracts): years + enterprise partnerships
+- 1M PLN ARR in 24 months = statistically anomalous without enterprise pivot or viral adoption
+
+### Sales cycle reality
+- Average B2B SaaS sales cycle globally: 134 days
+- Polish IT compliance tool: 90-180 days realistic
+- With PARP grant co-financing: add 3-6 months (reimbursement model = bridge financing needed by client)
+- DMU: 6-10 stakeholders (CEO, CTO, DPO/legal counsel)
+- Annual churn risk: post-audit abandonment if tool = one-time Annex IV generator only
+
+### Adjacent revenue streams — priority ranking
+1. **Regulatory Intelligence API** — HIGH viability, precedent (Clausematch, Archer), $1,000-3,000 USD/msc, enterprise GRC buyers, near-zero marginal cost. Build in 4-6 weeks using existing n8n + EUR-Lex pipeline.
+2. **Certification marketplace** (connecting firms to KRiBSI-approved auditors) — MODERATE viability, referral fee model, Europrivacy precedent.
+3. **White-label infrastructure for law firms** — MODERATE viability, scales via partner channel.
+4. **Compliance data products** — LOW viability until 100s of clients.
+
+### Acquisition path — concrete
+Target acquirers: Vanta, Drata, OneTrust. Precedent: Drata acquired SafeBase $250M. OneTrust acquires localized compliance engines.  
+Acquisition-attractive assets to build:
+1. Base of Polish SME IT clients with proven retention
+2. KRiBSI-specific procedural workflows in software
+3. Regulatory intelligence feed (machine-readable Polish AI Act changes)
+
+### Post-deadline sustainability — confirmed architectural advantage
+AI Act mandates CONTINUOUS obligations (not one-time):
+- Art. 72: Post-market monitoring — ongoing, cannot be done once
+- Art. 43(4): New conformity assessment on substantial modification
+- Art. 26: 6-month minimum log retention, rolling
+- KRiBSI: Annual reporting obligations
+Compilore git-commit versioning + citation trail = structural solution to these continuous requirements. Demand cliff is neutralized by operational dependency.
+
+---
+
+## DR-18: ProcessOS × Compilore — Context Engineering Synergy (2026-04-27)
+
+**Source:** External deep research report — "Architectural Synergy and Market
+Positioning: Context Engineering as a Joint Product Layer for Knowledge and Operations"
+
+**Findings accepted:**
+
+**1. knowledge_class taxonomy (Explicit_Normative vs Empirical_Descriptive)**
+Frontmatter separation between normative documents (official catalogs, regulatory
+text) and descriptive documents (AI synthesis, ProcessOS playbooks) is a correct
+and necessary architectural primitive. Implemented as D-99. Useful independently
+of ProcessOS: enables trust tiering in query responses.
+
+**2. Organizational Pathology Alert**
+When Lint detects conflict between a `knowledge_class: explicit_normative` page and a
+`knowledge_class: empirical_descriptive` page on the same topic → surface as "Pathology
+Alert" for human review. Do NOT auto-merge. This is a Phase 3 product feature but
+architecture must accommodate it from Phase 1 frontmatter schema.
+Example value: official Daikin warranty = 14-day processing. ProcessOS playbook shows
+actual handling = 3-day informal process. Alert flags compliance gap for management.
+
+**3. ProcessOS dual-layer architecture**
+Headless-only ProcessOS (no UI) rejected after debate: process visualization
+(swimlanes, timelines, bottleneck heatmaps) is fundamentally non-textual and
+requires dedicated rendering. BUT ProcessOS must NOT have its own knowledge base
+or query engine — that fragments corpus. Resolution: minimal visualization UI +
+Markdown artifact output to Compilore git repo. Decision: D-101.
+
+**4. M365 Graph API as Minimal Viable Integration**
+Single OAuth connector to Microsoft 365 Graph API (email metadata + calendar events)
+→ primitive "Communication Playbook" Markdown artifact → ingested to Compilore with
+`knowledge_class: empirical_descriptive`. Avoids complexity of Comarch ERP connector.
+Candidate Phase 2 sprint item. Activation trigger: post-pilot, if client has M365.
+
+**5. 20+ employee inflection point for ProcessOS**
+ProcessOS adds zero value at <5 employees (processes are tacit, event logs sparse).
+Value inflection at 20+ employees where Comarch/M365 event logs become dense enough
+for pattern detection. Use as product qualifier for ProcessOS upsell conversation.
+
+**6. ProcessOS activation triggers (all four required)**
+- Compilore has 3+ paying clients
+- MRR > 15,000 PLN
+- At least one client has 20+ employees
+- That client explicitly requests workflow bottleneck visibility
+
+**Findings rejected:**
+
+- "Direct ingestion into single flat wiki is unequivocally superior": federated
+  corpora with strict frontmatter tagging is safer until conflict resolution is
+  production-proven. D-101 allows separate git namespace (`wiki/processes/` vs
+  `wiki/catalog/`) within same repo.
+- Celonis as primary ProcessOS competitor: Celonis is 6-figure EUR enterprise.
+  Actual competitor = ClickUp + Notion AI used ad hoc, or nothing.
+
+**DR-18 → Decisions logged:** D-99, D-101
+
+---
+
+## DR-17: Pre-Mortem — 12 Failure Scenarios Assessment (2026-04-27)
+
+**Source:** External deep research report — "Pre-Mortem Analysis of Compilore:
+Architectural, Market, and Regulatory Failure Modes in Polish B2B Technical Distribution"
+
+**Scenario triage:**
+
+**ACTIONABLE — correct diagnosis, mitigation adopted:**
+
+*Scenario 11 (Confidence Decay Miscalibration):*
+Report correctly identifies flat -5%/month as producing alert fatigue and unsafe
+archival of valid engineering data. D-97 locked: page_type-aware decay. Engineering
+catalog pages = 0% decay.
+
+*Scenario 10 (Onboarding Cliff):*
+Confirmed existential risk. PyMuPDF will fail on scanned tabular PDFs. D-98 locked:
+30-document scope gate for Wojtek pilot (modern PDFs only). Docling timeline unchanged.
+
+*Scenario 2 (Knowledge Rot — confidence score gaming):*
+Report identifies `last_verified` updating on query citation without actual human
+review. Valid gap. Mitigation: reinforcement score requires explicit user
+verification flag, not just citation occurrence. Add to gatekeeper backlog.
+
+*Scenario 12 (Context Engineering Ceiling):*
+Parallel sub-agent decomposition (Agent A + B → synthesis Agent C) is valid and
+native to LangGraph. Real risk for Bartek's setup: thermal throttling on MacBook
+M4 Pro 24GB under 3 parallel Gemma 4 27B instances. Mitigation: sequential
+decomposition as fallback; full parallel reserved for Hetzner production.
+
+*Scenario 7 (RODO — silent API fallback):*
+Confirmed RODO vector. D-100 locked: API fallback must be explicit, logged, and
+user-acknowledged. Never silent.
+
+**PARTIALLY CORRECT — calibration required:**
+
+*Scenario 5 (Market Size Illusion):*
+Report used single PKD 46.74.Z (1,210 firms). Compilore TAM spans 5+ PKD codes.
+DR-11 SAM = 35M PLN/yr for HVAC alone. Report's median net profit argument
+applies to microfirms (<5 employees) which are not Compilore's target. OEM
+white-label mitigation proposed by report = 12-24 month enterprise sales cycle,
+not viable pre-revenue. Existing TAM model in DR-11 is more accurate.
+
+*Scenario 4 (Enterprise Displacement — NotebookLM):*
+Real risk is perception/positioning, not technical displacement. "NotebookLM does
+the same thing" is a buyer objection, not an architectural problem. Polish compliance
+stack (KSeF/JPK_FA awareness), ERP trust signal, citation trails, RODO-native
+infrastructure, and multi-tenant isolation are not replicable by NotebookLM.
+Mitigation: sharpen positioning language to lead with compliance moat, not AI capability.
+
+*Scenario 6 (Grant Channel Collapse):*
+Report's math is correct (75 PLN/month = no behavioral change for advisor).
+Proposed fix (100% first 3 months + 2K PLN bounty) still treats advisors as SaaS
+sales reps. Correct model: advisors earn from grant value, not SaaS subscription.
+D-102 locked.
+
+**INCORRECT — rejected:**
+
+*Scenario 1 mitigation (ERP integration as pilot prerequisite):*
+ERP API integration is Phase 3, not a pilot prerequisite. Wojtek's value moment =
+correct technical answer from catalog in <30 seconds. Pivot to "quote acceleration
+engine with Comarch API" before pilot validation is premature scope expansion that
+would kill the solo founder (solo founder wall = Scenario 3 in the same report).
+
+*Scenario 9 (Commoditization — switching cost = zero):*
+Report ignores data lock-in. After 3 months: compiled wiki of 300 catalogs,
+wikilinks between pages, query history, confidence scores. Migration = multi-week
+effort. Not ERP-class lock-in, but not zero either.
+
+**Top 3 existential risks confirmed (report's ranking partially accepted):**
+
+1. Onboarding Cliff (Scenario 10) — existential, actionable NOW → D-98
+2. Confidence Decay Miscalibration (Scenario 11) — existential at 6 months → D-97
+3. RODO silent fallback (Scenario 7) — legal, actionable NOW → D-100
+
+Report's #1 pick (Market Size Illusion) demoted: TAM analysis was based on single
+PKD code. Not existential given correct multi-PKD TAM model.
+
+**DR-17 → Decisions logged:** D-97, D-98, D-100, D-102
 
 ---
 
@@ -1063,7 +1379,7 @@ DR-14 sections 4.3 and 4.4 suggest building an anonymized cross-tenant knowledge
 - Anonymization techniques offer no legal safe harbor from OEM counsel demands
 - First lawsuit from an OEM would kill HermesTools-Compilore relationship permanently
 
-**Correct interpretation:** Compilore enforces hard `organization_id` isolation (already D-73). No cross-tenant learning. Each client's knowledge base is hermetic. This is a feature for procurement buyers, not a limitation to work around. Logged as D-86.
+**Correct interpretation:** Compilore enforces hard `organization_id` isolation (already D-73). No cross-tenant learning. Each client's knowledge base is hermetic. This is a feature for procurement buyers, not a limitation to work around. Logged as D-96.
 
 **Trap #3 — HermesTools is vendor, not OEM.**
 Report occasionally implies Compilore should sell directly to VW Poznań or Stellantis Gliwice. This is a 12–18 month procurement cycle with OEM risk tolerance near zero. HermesTools is our direct client (Phase 2 beachhead per D-70). If Compilore delivers value to HermesTools, HermesTools can position themselves as "Compilore-enhanced service provider" to their OEM clients — but Direct-to-OEM sales is Phase 3+ at earliest.
@@ -1078,7 +1394,7 @@ Polish B2B sectoral buying behavior (per DR-9 conservative buyer research) is de
 - AS9100 / NADCAP surveillance audits = semi-annual for aerospace Tier 1/2
 - IATF 16949 retention clock running for decades post-production
 
-This creates a deferred but potentially powerful repositioning of Compilore from "productivity tool for technical advisors" (current: 1,200–1,800 PLN/mo) to "audit-deadline insurance for compliance managers" (potential: 3,500–8,000 PLN/mo). See D-85 for decision framework.
+This creates a deferred but potentially powerful repositioning of Compilore from "productivity tool for technical advisors" (current: 1,200–1,800 PLN/mo) to "audit-deadline insurance for compliance managers" (potential: 3,500–8,000 PLN/mo). See D-95 for decision framework.
 
 ### What belongs in current (pilot-phase) activity
 
@@ -1094,7 +1410,7 @@ This creates a deferred but potentially powerful repositioning of Compilore from
 - Design cross-client knowledge graph
 - Launch Insurance pricing tier before pilot validates core premise
 
-**Decision gate for audit-framing pivot:** End of 8-week Wojtek pilot. If pilot succeeds on core catalog search AND audit-bundle test question resolves positively AND HermesTools has real aerospace footprint, then activate D-85 audit-framing strategy.
+**Decision gate for audit-framing pivot:** End of 8-week Wojtek pilot. If pilot succeeds on core catalog search AND audit-bundle test question resolves positively AND HermesTools has real aerospace footprint, then activate D-95 audit-framing strategy.
 
 ## DR-12 + DR-13 + DR-14 — Scheduled (2026-04-19)
 
@@ -1141,7 +1457,152 @@ process knowledge compilation (higher ARPU, deeper moat).
 - [ ] Update 09_PILOT.md Week 1-2 test questions with 
       DR-12 findings
 - [x] Assess grant feasibility for HermesTools (DR-13 RESULTS, 2026-04-19)
-- [x] Evaluate Industry 4.0 as Phase 3 use case (DR-14 RESULTS, 2026-04-19 — logged as deferred decision D-85, activation trigger: end of Wojtek pilot)
+- [x] Evaluate Industry 4.0 as Phase 3 use case (DR-14 RESULTS, 2026-04-19 — logged as deferred decision D-95, activation trigger: end of Wojtek pilot)
 - [x] Update 09_PILOT.md Week 3-4 test questions with DR-14 audit-bundle scenario (this session)
+
+---
+
+## DR-15: Strategic Synthesis — External Reports + EU Grants Verification (2026-04-20)
+
+**Source 1:** External deep research report — "Product-Market Fit 
+Analysis: B2B Knowledge Management Tools in the Polish SME Market"
+
+**Source 2:** External deep research report — "Competitive Analysis 
+of AI-Powered Knowledge Management and the 'Enterprise Brain': Global 
+Landscape and CEE Market Dynamics"
+
+**Source 3:** Verification web searches (PARP Ścieżka SMART 2026 
+regulations, ARP Dig.IT PKD eligibility, REACH/CLP 2026 deadlines, 
+MDR 2026-2028 timelines, Polish grant writer consultancy landscape, 
+SaaS partner program models)
+
+### Core findings that changed strategy
+
+1. **Pivot to B2B distribution (D-70) is externally validated** — 
+   both reports confirm painkiller framing over vitamin. Time-savings 
+   ROI (€1,000+/mo drain per advisor) is quantifiable, sales-ready, 
+   and falsifiable in 30 seconds. This beats abstract narratives.
+
+2. **Citation-hard requirement (D-72) is moat-class architectural 
+   choice** — not UX polish. Harvey AI at $1,200/user/msc still 
+   hallucinates 1/6 complex queries. Compilore "no citation = no 
+   display" is structural differentiator for compliance-sensitive 
+   sectors. Frame this as Trust Guarantee in sales.
+
+3. **Moat is shorter than 02_STRATEGY.md previously implied.** 
+   "Compiled wiki" as lone moat will erode within 12 months as 
+   Karpathy's pattern diffuses to open source (Axiom Wiki, Tanka AI, 
+   pi-llm-wiki already emerging). Real moat = compliance + locale 
+   package (D-81, D-78, D-82 + RODO-native + Comarch trust signal + 
+   regulatory awareness). Now packaged as "Compliance & Trust Moat" 
+   section in 02_STRATEGY.md.
+
+### Regulatory tailwinds in adjacent verticals (noted, not actionable)
+
+**Medical Devices (MDR EU 2017/745):**
+- May 2026: Class III custom-made implantable deadline
+- December 2027: Class III and Class IIb implantable (non-WET)
+- December 2028: other Class IIb, Class IIa, Class Is/Im
+- Poland penalty: up to 5,000,000 PLN fine + market withdrawal
+- Distributor obligation: MDR Article 16 quality management for 
+  relabel/repack; EUDAMED registration
+
+**Chemical (REACH + CLP + SDS):**
+- November 1, 2026: substances already on market must have updated 
+  SDS + classification per CLP Delegated Act (EU 2023/707)
+- Ongoing: SDS update obligation is continuous per REACH Art. 31(9) 
+  — any change in classification, composition, new regulation, or 
+  risk information triggers mandatory 12-month backward distribution 
+  to all recipients of last 12 months
+- Responsible party: producer, importer, AND distributor each liable
+
+**Decision:** both sectors represent strong demand. Compilore product 
+fit exists for retrieval use case (Use Case A: "find info under 
+regulatory pressure"). Compilore product fit does NOT yet exist for 
+compliance monitoring use case (Use Case B: event-driven SDS/technical 
+file updates from ECHA/EUDAMED feeds — would be separate product). 
+Both verticals deferred per D-86: no entry without design partner.
+
+### EU grant landscape — corrections vs DR-11
+
+**Ścieżka SMART (PARP):** rejected for Compilore clients. Requires 
+obligatory B+R component, 3M PLN minimum project size, innovation at 
+national level. Target: firms developing own R&D, not SaaS buyers. 
+Previous entry in DR-11 was incorrect.
+
+**Dig.IT (ARP):** fits production MŚP (Sekcja C — przetwórstwo 
+przemysłowe and production services) only. 150K-850K PLN grant, 50% 
+funded. Next window: June 2026. Main PKD restriction is strict — 
+explicitly verified: standard office or accounting software excluded. 
+Compilore must be framed as "AI/ML analytics" or "automated process 
+knowledge" to qualify under program obszary. Disqualifies HermesTools 
+(PKD 47.99.Z, Sekcja G). Eligible for downstream clients #3-10 if 
+targeted to production-sector MŚP.
+
+**Regional RPO (FE Śląskie 1.3 and equivalents):** most likely path 
+for distributors and other Sekcja G PKD clients. Window timing 
+voivodeship-dependent; to be verified via grant writer partner.
+
+**BUR (Baza Usług Rozwojowych):** PKD-agnostic, covers training 
+(not software license), 50-80% voivodeship-dependent refund. One-time 
+registration of Headframe as BUR provider = permanent infrastructure 
+for any future client (D-88).
+
+### Buying triggers ranking — methodological caveat
+
+Raport 1 ranks Polish SME KM buying triggers as:
+1. Key person leaving (Highest Frequency)
+2. Audit/Compliance deadlines (High)
+3. New hire onboarding pain (Medium-High)
+4. Sales/support latency (Medium)
+
+**However:** report does not disclose ranking methodology, sample 
+size, or distinguish macro retention trend from actual software 
+buying triggers. Academic sources (IDEAS/RePEc, PJMS, Biblioteka 
+Nauki, EBRD diagnostic) are about KM adoption generally, not 
+empirical buying-trigger studies. Ranking is directional, not 
+quantitative.
+
+Strategic implication (D-87): do NOT narrative-shift primary pitch 
+to succession. Quantified time-savings (trigger #4 by report ranking, 
+but most falsifiable by buyer in 30 seconds) is the better lead for 
+risk-averse Polish SME owner. Succession narrative = amplifier, not 
+primary.
+
+### Partnership channel discovery — grant writer success-fee model
+
+Polish grant consulting industry standard: consultant charges nothing 
+upfront, takes 5-15% commission on awarded grant as success fee, and 
+the grant-writing service itself is a qualified project cost covered 
+by the grant. Client out-of-pocket = zero. This creates natural 
+alignment with Compilore (D-84):
+
+- Grant writer wants high-value projects (AI SaaS > basic hardware)
+- Grant writer already holds MŚP trust
+- Compilore wants leads with pre-approved budget
+- 5% recurring Compilore revenue share for 24 months aligns partner 
+  incentive toward retention, not just close
+
+**First 5 outreach targets identified** (see D-84 for list). Quality 
+filter: partner must have 2+ recent successful MŚP projects under 
+Dig.IT or FENG involving software (not hardware-only).
+
+### Pending items for post-HermesTools re-evaluation
+
+- Verify HermesTools revenue split by PKD code (47.99.Z vs 28.29.Z 
+  vs 33.20.Z) to confirm D-85 Dig.IT disqualification
+- Verify current Działanie 1.3 FE Śląskie state (or equivalent 
+  regional RPO) — action for grant writer partner on first call
+- Evaluate use-case A (retrieval under regulatory pressure) product 
+  fit for medical/chemical after first design partner contact 
+  (post D-86 release)
+- Run DR-12/13/14 (scheduled 2026-04-19) — DR-15 does not replace 
+  these, but recontextualizes DR-13 findings (EU grants fit) within 
+  corrected program map above
+
+**Decision trace:** `docs/04_DECISIONS.md` **D-84–D-88** (post-report 
+strategy synthesis). Prior PRE-PILOT rows that occupied numeric slots 
+D-84–D-86 (ERP disclosure, audit deferral, cross-tenant isolation) are 
+**D-94–D-96** with SUPERSEDED cross-references.
 
 ---

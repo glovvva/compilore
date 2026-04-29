@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS public.documents (
   file_path TEXT,
   doc_type TEXT DEFAULT 'markdown',
   status TEXT DEFAULT 'pending',
+  authority_tier INT DEFAULT 3 CHECK (authority_tier BETWEEN 1 AND 4),
   metadata JSONB DEFAULT '{}',
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -137,8 +138,12 @@ SET search_path = public
 AS $$
   WITH semantic AS (
     SELECT dc.id, dc.wiki_page_id, dc.chunk_text,
+      COALESCE(d.authority_tier, 3) AS authority_tier,
+      NULLIF(wp.frontmatter->>'last_verified', '') AS last_verified_raw,
       ROW_NUMBER() OVER (ORDER BY dc.embedding <=> query_embedding) AS rank
     FROM public.document_chunks dc
+    LEFT JOIN public.documents d ON d.id = dc.document_id
+    LEFT JOIN public.wiki_pages wp ON wp.id = dc.wiki_page_id
     WHERE dc.tenant_id = (SELECT up.tenant_id FROM public.user_profiles up WHERE up.id = auth.uid())
       AND dc.embedding IS NOT NULL
     ORDER BY dc.embedding <=> query_embedding
@@ -146,8 +151,12 @@ AS $$
   ),
   fulltext AS (
     SELECT dc.id, dc.wiki_page_id, dc.chunk_text,
+      COALESCE(d.authority_tier, 3) AS authority_tier,
+      NULLIF(wp.frontmatter->>'last_verified', '') AS last_verified_raw,
       ROW_NUMBER() OVER (ORDER BY ts_rank_cd(dc.tsv, plainto_tsquery('simple', query_text)) DESC) AS rank
     FROM public.document_chunks dc
+    LEFT JOIN public.documents d ON d.id = dc.document_id
+    LEFT JOIN public.wiki_pages wp ON wp.id = dc.wiki_page_id
     WHERE dc.tenant_id = (SELECT up.tenant_id FROM public.user_profiles up WHERE up.id = auth.uid())
       AND dc.tsv @@ plainto_tsquery('simple', query_text)
     ORDER BY ts_rank_cd(dc.tsv, plainto_tsquery('simple', query_text)) DESC
@@ -158,7 +167,15 @@ AS $$
       COALESCE(s.id, f.id) AS id,
       COALESCE(s.wiki_page_id, f.wiki_page_id) AS wiki_page_id,
       COALESCE(s.chunk_text, f.chunk_text) AS chunk_text,
-      COALESCE(1.0::float / (rrf_k + s.rank), 0::float) + COALESCE(1.0::float / (rrf_k + f.rank), 0::float) AS score
+      COALESCE(s.authority_tier, f.authority_tier, 3) AS authority_tier,
+      COALESCE(s.last_verified_raw, f.last_verified_raw) AS last_verified_raw,
+      -- Scaffold only: keep score neutral until authority/recency business rules ship.
+      1.0::float AS authority_multiplier,
+      1.0::float AS recency_multiplier,
+      (
+        COALESCE(1.0::float / (rrf_k + s.rank), 0::float)
+        + COALESCE(1.0::float / (rrf_k + f.rank), 0::float)
+      ) * 1.0::float * 1.0::float AS score
     FROM semantic s
     FULL OUTER JOIN fulltext f ON s.id = f.id
   )

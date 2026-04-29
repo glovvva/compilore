@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import os
 import threading
-from typing import Any, Optional
+from typing import Any, Literal, Optional, TypedDict
 
 from supabase import Client, create_client
 
@@ -15,6 +15,17 @@ _TENANT_FK_HINT = (
     "Ensure COMPILORE_DEFAULT_TENANT_ID matches a row in public.tenants "
     "(run sql/003_seed_tenant.sql, then SELECT id FROM tenants WHERE name = 'bartek-playground')."
 )
+
+
+class Department(TypedDict):
+    """Department row returned by Supabase."""
+
+    id: str
+    tenant_id: str
+    name: str
+    slug: str
+    visibility: Literal["private", "tenant_wide"]
+    created_at: str
 
 
 def get_supabase_service_key() -> str:
@@ -72,6 +83,7 @@ def insert_document_row(
     file_path: Optional[str],
     metadata: dict[str, Any],
     module: Optional[str] = None,
+    authority_tier: int = 3,
 ) -> str:
     """Insert a ``documents`` row; return new UUID string."""
     ensure_tenant_exists(client, tenant_id)
@@ -82,6 +94,7 @@ def insert_document_row(
         "file_path": file_path,
         "status": "compiled",
         "metadata": metadata,
+        "authority_tier": authority_tier,
     }
     if module is not None:
         row["module"] = module

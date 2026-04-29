@@ -9,6 +9,7 @@ export interface WikiPage {
   confidence: number;
   updated_at: string;
   related: string[];
+  frontmatter?: Record<string, unknown>;
 }
 
 /** Full page for inspector (includes body from `content_markdown`). */

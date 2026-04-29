@@ -1,13 +1,7 @@
-// ⚠️ PANELS ARE INTENTIONALLY NON-COLLAPSIBLE
-// Do not add collapsible, collapsedSize, or collapse/expand logic.
-// This has been a recurring bug (fixed 4 times, keeps regressing).
-// Panels are resizable via drag but CANNOT be collapsed.
-// Layout is NOT persisted to localStorage — always starts at 25/50/25.
-
 "use client";
 
 import * as React from "react";
-import { Group, Panel, Separator } from "react-resizable-panels";
+import { ChevronRight } from "lucide-react";
 import { WikiNavBridge } from "@/components/wiki-nav-bridge";
 import { QueryPanel } from "@/components/query-panel";
 import { InspectorPanel } from "@/components/inspector-panel";
@@ -15,47 +9,59 @@ import { StatusBar } from "@/components/status-bar";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { CommandPalette } from "@/components/command-palette";
 import { IngestModal } from "@/components/ingest-modal";
+import { cn } from "@/lib/utils";
 
 export function WorkspaceShell({ children }: { children?: React.ReactNode }) {
+  const [leftOpen, setLeftOpen] = React.useState(true);
+  const [rightOpen, setRightOpen] = React.useState(true);
+
   return (
     <div className="flex h-dvh max-h-dvh flex-col overflow-hidden bg-background text-foreground">
-      <header className="flex h-10 shrink-0 items-center justify-end border-b border-border bg-surface px-2">
-        <ThemeToggle />
+      <header className="flex h-10 shrink-0 items-center justify-between border-b border-border bg-surface px-2">
+        <div className="flex items-center">
+          {!leftOpen && (
+            <button
+              type="button"
+              onClick={() => setLeftOpen(true)}
+              className="flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-background hover:text-foreground"
+              aria-label="Open wiki sidebar"
+            >
+              <ChevronRight className="size-4" />
+            </button>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          {!rightOpen && (
+            <button
+              type="button"
+              onClick={() => setRightOpen(true)}
+              className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground"
+              aria-label="Open inspector"
+            >
+              Inspector
+            </button>
+          )}
+          <ThemeToggle />
+        </div>
       </header>
 
-      <Group
-        orientation="horizontal"
-        className="min-h-0 flex-1"
-      >
-        <Panel
-          defaultSize={25}
-          minSize={25}
-          maxSize={45}
-          className="overflow-hidden"
+      <div className="relative min-h-0 flex-1">
+        {leftOpen && <WikiNavBridge onClose={() => setLeftOpen(false)} />}
+
+        <main
+          className={cn(
+            "h-full overflow-hidden",
+            leftOpen ? "pl-72" : "pl-0",
+            rightOpen ? "pr-80" : "pr-0",
+          )}
         >
-          <WikiNavBridge />
-        </Panel>
-
-        <Separator className="w-2 shrink-0 bg-border" />
-
-        <Panel defaultSize={50} minSize={25} className="overflow-hidden">
           <QueryPanel>{children}</QueryPanel>
-        </Panel>
+        </main>
 
-        <Separator className="w-2 shrink-0 bg-border" />
-
-        <Panel
-          defaultSize={25}
-          minSize={25}
-          maxSize={40}
-          className="overflow-hidden"
-        >
-          <InspectorPanel panelRef={{ current: null }} />
-        </Panel>
-      </Group>
+        {rightOpen && <InspectorPanel onClose={() => setRightOpen(false)} />}
+      </div>
 
       <StatusBar />
-
       <CommandPalette />
       <IngestModal />
     </div>

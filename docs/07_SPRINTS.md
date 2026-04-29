@@ -1,14 +1,14 @@
 # 07 — SPRINTS
 ## Compilore: Sprint Plan, Status, Backlog
 
-**Last updated:** 2026-04-19
+**Last updated:** 2026-04-29
 
 ---
 
 ## Current Status Summary
 
 **Phase:** 1 — Personal Playground
-**Sprint:** Sprint 3 (Lint) + Sprint 4b (Wiki Tree) complete; **Auth shipped 2026-04-12** (magic link + JWT tenant). Next: Hetzner deploy + beta hardening
+**Sprint:** Sprint 3 (Lint) + Sprint 4b (Wiki Tree) complete; **Auth shipped 2026-04-12** (magic link + JWT tenant). **Production:** Coolify on Hetzner (app.compilore.pl / api.compilore.pl) since 2026-04-29. Next: beta hardening
 **Running:** Locally on MacBook Pro 14" M4 Pro (24GB), localhost:8001
 **Repo:** github.com/glovvva/compilore (private)
 **Supabase:** EU West (Paris), schema deployed, tenant "bartek-playground" active (id: a6d3721a…)
@@ -36,7 +36,8 @@
 - LangSmith monitoring not connected
 - Model name `claude-3-5-haiku-20241022` in some places — update to `claude-haiku-4-5-20251001`
 - No text paste input endpoint (`/ingest/paste`)
-- Running locally only — no Hetzner deploy yet
+- VPN users: DNS for compilore.pl may not resolve through VPN resolver (10.2.0.1) — use 1.1.1.1 or disable VPN
+- Supabase redirect URL must be added: https://app.compilore.pl/** (manual step pending)
 - Mermaid mindmap: requires `mermaid` code block in LLM response — mindmap hint appended to query but real query API not yet wired (mock only)
 
 ---
@@ -139,15 +140,21 @@
 
 ---
 
-## Sprint 4 — Polish + Beta Access ✅ COMPLETE (deploy + beta items open)
+## Sprint 4 — Polish + Beta Access ✅ COMPLETE (beta items open)
 
 **Goal:** Deploy to Hetzner. Give beta testers access. Daily use. Fix friction.
 
 ### Deploy
-- [ ] Deploy to Hetzner via Coolify (Dockerfile ready)
-- [ ] Set up domain/subdomain (compilore.twoja-domena.com)
-- [ ] Configure env vars in Coolify
-- [ ] Test from phone
+- [x] Deploy to Hetzner via Coolify (Dockerfile ready)
+- [x] Set up domain/subdomain (app.compilore.pl, api.compilore.pl)
+- [x] Configure env vars in Coolify (NEXT_PUBLIC_API_URL)
+- [x] Test from phone
+
+Frontend deployed 2026-04-29 via Coolify (compilore_web environment).  
+app.compilore.pl → Next.js frontend (port 3000)  
+api.compilore.pl → FastAPI backend (port 8000)  
+DNS: Cloudflare (jerome/paloma NS), propagated via Cyberfolks.  
+Dockerfile uses npm (not pnpm) — package-lock.json is the lockfile.
 
 ### Pilot infrastructure prerequisite (before Wojtek onboarding)
 
@@ -352,7 +359,7 @@ Items that are defined but not yet assigned to a sprint:
 | PII stripping middleware | Phase 2 | spaCy NER + RegEx |
 | Technical Advisor query flow wiring | ICP — Technical Advisor | ✅ done 2026-04-16. Feature flag: TECHNICAL_ADVISOR_MODE=true in .env. Default off. Core query_graph.py untouched. |
 | Technical Advisor Docling table extraction | ICP — Technical Advisor / Phase 2 | Replace PyMuPDF for manufacturer catalogs. TableFormer ACCURATE mode. See adapters/technical_advisor/README.md |
-| `adapters/audit_compliance/` | Phase 3 | Placeholder for audit-bundle output format. Generates consolidated PDF/Markdown package for on-demand audit events: calibration certs + PFMEA + recent torque program logs + IATF/VDA retention matrices. Activation trigger: D-85 pilot success. Do NOT build until pilot validates audit-bundle Week 3-4 test question. See DR-14 RESULTS in 08_RESEARCH.md. |
+| `adapters/audit_compliance/` | Phase 3 | Placeholder for audit-bundle output format. Generates consolidated PDF/Markdown package for on-demand audit events: calibration certs + PFMEA + recent torque program logs + IATF/VDA retention matrices. Activation trigger: D-95 pilot success. Do NOT build until pilot validates audit-bundle Week 3-4 test question. See DR-14 RESULTS in 08_RESEARCH.md. |
 | PreResponseChecklist in gatekeeper | Quality | Self-verification loop after evaluation: gatekeeper checks own reasoning vs N×N×G criteria. ~14pp quality improvement per GapRoll harness research. TODO already in `gatekeeper.py` docstring. |
 | VLM fallback (GPT-4o Vision) | Phase 2 | Scanned pages/maps |
 | plan_ogolny_adapter.py | Phase 2 | Distinct from MPZP (reform 2026) |
@@ -365,3 +372,60 @@ Items that are defined but not yet assigned to a sprint:
 | Proposal output persistence | Output / Wiki | Save to `wiki/outputs/proposals/` with atomic git commit |
 
 Decision traceability: Department isolation and i18n foundations for Phase 2 implementation are tracked as `D-59` and `D-60` in `docs/04_DECISIONS.md`.
+
+---
+
+## Parallel Discovery Sprint — Partnership Channel (2026-04-20)
+
+Parallel track to HermesTools pilot. Does NOT block pilot. Time budget: 
+~2-4h/week, not more.
+
+### Immediate (this week)
+
+- [ ] Send 5 personalized outreach emails to grant consulting firms: 
+      Strategor, Grants.Capital, All-Grants, DotacjeDlaKażdego, 
+      Najda Consulting. Goal: 20-min intro calls, not sales.
+      Email template: position as AI SaaS for Polish MŚP, qualifies 
+      for digitization grants, looking for partners on success-fee + 
+      5% recurring revenue share model (first 24 months).
+- [ ] Qualify each partner in intro call: ask for 2 recent successful 
+      MŚP projects under Dig.IT or FENG. "Bought hardware" = decline. 
+      "Implemented ERP with AI" = pursue.
+- [ ] Verify HermesTools PKD revenue split — which code generates 
+      dominant revenue (47.99.Z vs 28.29.Z vs 33.20.Z). Action for 
+      Wojtek to confirm via accounting contact. Determines Dig.IT 
+      assessment (likely confirmation of D-85: disqualified).
+
+### Short-term (first month after pilot validation signal)
+
+- [ ] Build Partner Kit one-pager (Polish): product description, ROI 
+      calculator, list of Dig.IT/regional-RPO obszary under which 
+      Compilore qualifies, draft grant application template with 
+      Compilore as qualified cost line. For grant writer to hand to 
+      their client.
+- [ ] Verify current state of Działanie 1.3 FE Śląskie (or equivalent 
+      regional RPO for digitization). Document window dates, 
+      eligibility criteria, maximum grant size. This is the path for 
+      HermesTools and distributor-PKD clients.
+- [ ] First joint engagement: pair 1 grant writer with 1 introduced 
+      MŚP prospect. Run the full motion end-to-end once before 
+      scaling to 3+ partners.
+
+### Deferred to post-pilot
+
+- [ ] Register Headframe Sp. z o.o. in Baza Usług Rozwojowych (BUR) 
+      as service provider (training refund eligibility for future 
+      clients regardless of PKD). See D-88. Process: 2-4 weeks 
+      paperwork. Do after HermesTools provides reference.
+- [ ] Dig.IT June 2026 window preparation — only if client #3-#10 
+      pipeline includes Sekcja C production MŚP. Not for HermesTools.
+
+### Explicitly NOT doing now (documented rejection)
+
+- Medical/Chemical discovery calls (D-86 — deferred until design 
+  partner secured)
+- POLMED membership (budget)
+- Acqui-hire of regulatory affairs partner (equity constraint)
+- Writing own grant applications (grant writer's job, not founder's)
+- LinkedIn "build in public" for B2B distribution vertical (wrong 
+  audience — see existing "What NOT to do" in 02_STRATEGY.md)

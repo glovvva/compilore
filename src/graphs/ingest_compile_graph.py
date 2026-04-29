@@ -1,9 +1,11 @@
 """LangGraph: **Ingest** → **Compile** pipeline.
 
-Nodes: read_document → compile_wiki → store_to_supabase → write_wiki_files →
-git_commit → log_operation (second commit for ``log.md`` only). Uses ``MemorySaver`` until
-PostgresSaver is wired. After ``store_to_supabase``, ``embed_and_store_chunks`` writes ``document_chunks``
-for hybrid / full-text retrieval.
+Nodes: read_document → compile_wiki → store_to_supabase → entity_resolver →
+conflict_detector → embed_and_store_chunks → write_wiki_files → git_commit →
+log_operation (second commit for ``log.md`` only). Uses ``MemorySaver`` until
+PostgresSaver is wired. After ``store_to_supabase``, compile-side HITL scaffolds
+can inspect persisted page ids before chunk embeddings are written for hybrid /
+full-text retrieval.
 """
 
 from __future__ import annotations
@@ -24,6 +26,11 @@ from src.lib.supabase import (
     insert_document_row,
     insert_wiki_pages_for_document,
 )
+from src.modules.compile.conflict_detector import (
+    detect_compile_time_conflicts,
+    queue_conflicts_for_hitl_review,
+)
+from src.modules.compile.entity_resolver import resolve_entity_merge_suggestions
 from src.modules.compile.index_manager import append_compiled_pages_to_index
 from src.modules.compile.models import WikiPage
 from src.modules.compile.embed_chunks import embed_and_store_wiki_pages_chunks
@@ -57,10 +64,13 @@ class IngestCompileState(TypedDict, total=False):
     paste_title: str
     original_filename: str
     tenant_id: str
+    authority_tier: int
     ingest: dict[str, Any]
     document_title: str
     wiki_pages: list[dict[str, Any]]
     document_id: str
+    merge_suggestions: list[dict[str, Any]]
+    conflict_flags: list[dict[str, Any]]
     claude_input_tokens: int
     claude_output_tokens: int
     claude_cost_usd: float
@@ -239,6 +249,7 @@ def node_store_to_supabase(state: IngestCompileState) -> dict[str, Any]:
             file_path=file_path,
             metadata=metadata,
             module=_ingest_adapter_module(ingest.doc_type),
+            authority_tier=int(state.get("authority_tier", 3)),
         )
         slug_to_id = insert_wiki_pages_for_document(
             client,
@@ -265,6 +276,54 @@ def node_store_to_supabase(state: IngestCompileState) -> dict[str, Any]:
         pdf_extract_log=pdf_extract_log,
     )
     return {"document_id": doc_id, "wiki_page_ids_by_slug": slug_to_id}
+
+
+def node_entity_resolver(state: IngestCompileState) -> dict[str, Any]:
+    """Compile-loop HITL scaffold for near-duplicate entity merge suggestions."""
+    if state.get("error"):
+        return {}
+    try:
+        client = create_supabase_client()
+        tenant_id = state.get("tenant_id") or _default_tenant_id()
+        pages = [WikiPage.model_validate(p) for p in state["wiki_pages"]]
+        slug_map = state.get("wiki_page_ids_by_slug") or {}
+        suggestions = resolve_entity_merge_suggestions(
+            client,
+            tenant_id=tenant_id,
+            pages=pages,
+            slug_to_wiki_page_id=slug_map,
+        )
+    except Exception as exc:
+        return {"error": f"Entity resolver failed: {exc}"}
+    return {
+        "merge_suggestions": [suggestion.model_dump(mode="json") for suggestion in suggestions],
+    }
+
+
+def node_conflict_detector(state: IngestCompileState) -> dict[str, Any]:
+    """Compile-loop HITL scaffold for semantically similar but conflicting pages."""
+    if state.get("error"):
+        return {}
+    try:
+        client = create_supabase_client()
+        tenant_id = state.get("tenant_id") or _default_tenant_id()
+        pages = [WikiPage.model_validate(p) for p in state["wiki_pages"]]
+        slug_map = state.get("wiki_page_ids_by_slug") or {}
+        conflicts = detect_compile_time_conflicts(
+            client,
+            tenant_id=tenant_id,
+            pages=pages,
+            slug_to_wiki_page_id=slug_map,
+        )
+        queue_conflicts_for_hitl_review(
+            tenant_id=tenant_id,
+            document_id=state["document_id"],
+            conflict_flags=conflicts,
+            webhook_url=os.environ.get("COMPILE_CONFLICT_N8N_WEBHOOK_URL"),
+        )
+    except Exception as exc:
+        return {"error": f"Conflict detector failed: {exc}"}
+    return {"conflict_flags": [flag.model_dump(mode="json") for flag in conflicts]}
 
 
 def node_embed_and_store_chunks(state: IngestCompileState) -> dict[str, Any]:
@@ -368,6 +427,8 @@ def build_ingest_compile_graph() -> Any:
     builder.add_node("read_document", node_read_document)
     builder.add_node("compile_wiki", node_compile_wiki)
     builder.add_node("store_to_supabase", node_store_to_supabase)
+    builder.add_node("entity_resolver", node_entity_resolver)
+    builder.add_node("conflict_detector", node_conflict_detector)
     builder.add_node("embed_and_store_chunks", node_embed_and_store_chunks)
     builder.add_node("write_wiki_files", node_write_wiki_files)
     builder.add_node("log_operation", node_log_operation)
@@ -384,7 +445,9 @@ def build_ingest_compile_graph() -> Any:
             "abort": END,
         },
     )
-    builder.add_edge("store_to_supabase", "embed_and_store_chunks")
+    builder.add_edge("store_to_supabase", "entity_resolver")
+    builder.add_edge("entity_resolver", "conflict_detector")
+    builder.add_edge("conflict_detector", "embed_and_store_chunks")
     builder.add_edge("embed_and_store_chunks", "write_wiki_files")
     builder.add_edge("write_wiki_files", "git_commit")
     builder.add_edge("git_commit", "log_operation")
@@ -399,6 +462,7 @@ def run_ingest_compile(
     temp_path: Path,
     original_filename: str,
     tenant_id: str | None = None,
+    authority_tier: int = 3,
 ) -> tuple[list[WikiPage], str | None]:
     """Execute the graph once; return ``(pages, error_message)``."""
     graph = build_ingest_compile_graph()
@@ -409,6 +473,7 @@ def run_ingest_compile(
             "temp_path": str(temp_path.resolve()),
             "original_filename": original_filename,
             "tenant_id": tid,
+            "authority_tier": authority_tier,
             "error": None,
             "max_retries": 3,
             "compile_retry_count": 0,
@@ -427,6 +492,7 @@ def run_ingest_compile_from_url(
     *,
     url: str,
     tenant_id: str | None = None,
+    authority_tier: int = 3,
 ) -> tuple[list[WikiPage], str | None]:
     """Execute ingest→compile for a remote URL (``read_document`` uses URL adapter)."""
     graph = build_ingest_compile_graph()
@@ -438,6 +504,7 @@ def run_ingest_compile_from_url(
             "source_url": raw_url,
             "original_filename": raw_url,
             "tenant_id": tid,
+            "authority_tier": authority_tier,
             "error": None,
             "max_retries": 3,
             "compile_retry_count": 0,
@@ -457,6 +524,7 @@ def run_ingest_compile_from_paste(
     content: str,
     title: str = "Pasted Text",
     tenant_id: str | None = None,
+    authority_tier: int = 3,
 ) -> tuple[list[WikiPage], str | None]:
     """Execute ingest→compile for raw pasted text (no file upload)."""
     graph = build_ingest_compile_graph()
@@ -468,6 +536,7 @@ def run_ingest_compile_from_paste(
             "paste_title": title,
             "original_filename": "paste.txt",
             "tenant_id": tid,
+            "authority_tier": authority_tier,
             "error": None,
             "max_retries": 3,
             "compile_retry_count": 0,

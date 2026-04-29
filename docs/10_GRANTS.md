@@ -182,11 +182,11 @@ Compilore as enterprise institutional memory. **Requires:**
 verification of actual advisor age distribution. If average age 
 >50, this narrative is authentic. If average age <40, skip.
 
-### Option C — ERP modernization prep (strongest narrative — depends on D-84)
+### Option C — ERP modernization prep (strongest narrative — depends on D-94)
 10-year-old custom ERP is data silo. Compilore as intelligence layer 
 enables eventual ERP modernization without full replacement. Best 
 fit for FE Śląskie 1.8 "zasadnicza zmiana procesu biznesowego" 
-requirement. **Requires D-84 pilot success gate hit** — only viable 
+requirement. **Requires D-94 pilot success gate hit** — only viable 
 if disclosed to HermesTools management.
 
 ### Option D — Automotive OEM audit compliance pressure (strongest when DR-14 facts apply)
@@ -213,7 +213,7 @@ If all three conditions hold → this becomes the primary FE Śląskie 1.8 narra
 
 ### Selection rule (updated 2026-04-19)
 - Pilot succeeds + aerospace footprint confirmed + calibration revenue dominant → **Option D primary, Option C supplementary**
-- Pilot succeeds + D-84 disclosure trigger hit (ERP angle reveal possible) → **Option C primary, Option D supplementary**
+- Pilot succeeds + D-94 disclosure trigger hit (ERP angle reveal possible) → **Option C primary, Option D supplementary**
 - Pilot succeeds without audit or ERP angle signals → **Option A (regulatory documentation pressure, safe default)**
 - Pilot hits succession demographic signals (advisor age distribution) → **Option B**
 - Narratives are not mutually exclusive — a strong application may weave Option A + Option C + Option D for maximum scoring
@@ -279,7 +279,7 @@ active through pilot + PoC fees.
 - [ ] Existing de minimis aid usage at HermesTools (Dig.IT constraint)
 - [ ] Management awareness of / interest in grant instruments
 - [ ] Consultancy selection decision (internal vs external vs joint)
-- [ ] D-84 disclosure trigger resolution after Week 4 pilot metrics
+- [ ] D-94 disclosure trigger resolution after Week 4 pilot metrics
 - [ ] FE Śląskie 1.8 2026 nabór schedule (monitor funduszeue.slaskie.pl)
 - [ ] Dig.IT June 2026 regulamin publication (monitor digit.arp.pl)
 - [ ] HermesTools aerospace client footprint — real contracts beyond RECOULES catalog distribution? (PZL Mielec, Avio Polska, MESKO, WZL) — ask during pilot Week 4-6
@@ -295,6 +295,6 @@ active through pilot + PoC fees.
 - KRS HermesTools: rejestr.io/krs/187483/hermestools, aleo.com, imsig.pl
 
 **Internal:**
-- 04_DECISIONS.md D-70 (beachhead pivot), D-80/D-84 (ERP angle disclosure), D-82 (Biała Lista), D-83 (grants as GTM lever), D-85 (audit-framing deferred), D-86 (no cross-tenant learning)
+- 04_DECISIONS.md D-70 (beachhead pivot), D-80/D-94 (ERP angle disclosure), D-82 (Biała Lista), D-83 (grants as GTM lever), D-84–D-88 (post-report strategy: Channel 0, EU map, medical/chemical deferral, sales narrative, BUR), D-95 (audit-framing deferred), D-96 (no cross-tenant learning)
 - 08_RESEARCH.md DR-9 (conservative buyer psychology), DR-11 (market sizing + grant GTM lever), DR-13 RESULTS (HermesTools facts + grant reality), DR-14 RESULTS (audit compliance + OEM regulatory facts)
 - 09_PILOT.md (Wojtek pilot framework — success gates drive this playbook's decision tree)
