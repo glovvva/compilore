@@ -33,7 +33,7 @@ export function InspectorPanel({ panelRef }: InspectorPanelProps) {
   }, [detail?.content_markdown]);
 
   return (
-    <div className="flex h-full min-h-0 flex-col border-l border-border bg-surface">
+    <div className="flex h-full w-full min-h-0 flex-col border-l border-border bg-surface">
       <div className="flex items-center justify-between border-b border-border px-2 py-2">
         <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
           Inspector

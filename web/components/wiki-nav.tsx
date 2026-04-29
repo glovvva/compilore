@@ -105,7 +105,7 @@ export function WikiNav({ onPageSelect, selectedSlug }: WikiNavProps) {
   }, [pages]);
 
   return (
-    <div className="flex h-full min-h-0 flex-col border-r border-border bg-surface">
+    <div className="flex h-full w-full min-h-0 flex-col border-r border-border bg-surface">
       <div className="flex items-center border-b border-border px-2 py-2">
         <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Wiki</span>
       </div>

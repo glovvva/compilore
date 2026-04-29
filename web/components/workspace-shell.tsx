@@ -33,14 +33,14 @@ export function WorkspaceShell({ children }: { children?: React.ReactNode }) {
           defaultSize={25}
           minSize={25}
           maxSize={45}
-          className="min-w-0"
+          className="overflow-hidden"
         >
           <WikiNavBridge />
         </Panel>
 
         <Separator className="w-2 shrink-0 bg-border" />
 
-        <Panel id="main" minSize={25} className="min-w-0">
+        <Panel id="main" minSize={25} className="overflow-hidden">
           <QueryPanel>{children}</QueryPanel>
         </Panel>
 
@@ -51,7 +51,7 @@ export function WorkspaceShell({ children }: { children?: React.ReactNode }) {
           defaultSize={25}
           minSize={25}
           maxSize={40}
-          className="min-w-0"
+          className="overflow-hidden"
         >
           <InspectorPanel panelRef={{ current: null }} />
         </Panel>
